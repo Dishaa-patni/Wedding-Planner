@@ -5,34 +5,36 @@
 @layer base {
   :root {
     /* Warm ivory background + rose gold accents */
-    --background: 28 100% 98%; /* #FFF9F5 ivory */
-    --foreground: 20 15% 15%;
+    --background: 25 100% 98%; /* #FFF9F6 ivory */
+    --foreground: 0 0% 18%; /* #2E2E2E charcoal */
     --card: 0 0% 100%;
-    --card-foreground: 20 15% 15%;
+    --card-foreground: 0 0% 18%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 15% 15%;
+    --popover-foreground: 0 0% 18%;
     --primary: 350 32% 57%; /* Rose Gold #B76E79 */
-    --primary-foreground: 28 100% 98%;
-    --secondary: 30 40% 94%;
-    --secondary-foreground: 20 15% 15%;
+    --primary-foreground: 25 100% 98%;
+    --secondary: 348 47% 85%; /* Soft Blush #EAC7CE */
+    --secondary-foreground: 0 0% 18%;
     --muted: 30 30% 94%;
-    --muted-foreground: 25 10% 40%;
-    --accent: 40 60% 82%; /* soft gold */
-    --accent-foreground: 20 15% 15%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 38 55% 64%; /* Champagne Gold #D8B26E */
+    --accent-foreground: 0 0% 18%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 30 30% 90%;
     --input: 30 30% 90%;
     --ring: 350 32% 57%;
     --chart-1: 350 32% 57%;
-    --chart-2: 40 60% 65%;
-    --chart-3: 20 30% 45%;
-    --chart-4: 340 40% 70%;
-    --chart-5: 35 45% 55%;
+    --chart-2: 38 55% 64%;
+    --chart-3: 348 47% 85%;
+    --chart-4: 20 30% 45%;
+    --chart-5: 120 15% 55%;
     --radius: 1rem;
     --rose-gold: #B76E79;
-    --gold: #D4AF7A;
-    --ivory: #FFF9F5;
+    --gold: #D8B26E;
+    --blush: #EAC7CE;
+    --ivory: #FFF9F6;
+    --charcoal: #2E2E2E;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -50,7 +52,7 @@
   html { scroll-behavior: smooth; }
   body {
     @apply bg-background text-foreground;
-    background-color: #FFF9F5;
+    background-color: #FFF9F6;
     font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   }
   h1, h2, h3, h4, h5, h6, .font-display {
@@ -81,7 +83,7 @@
 .border-rose-gold { border-color: #B76E79; }
 
 .gradient-text {
-  background: linear-gradient(135deg, #B76E79 0%, #D4AF7A 50%, #B76E79 100%);
+  background: linear-gradient(135deg, #B76E79 0%, #D8B26E 50%, #B76E79 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -89,7 +91,7 @@
 }
 
 .gradient-warm {
-  background: linear-gradient(180deg, #FFF9F5 0%, #FDF2E9 50%, #FFF9F5 100%);
+  background: linear-gradient(180deg, #FFF9F6 0%, #FDF2E9 50%, #FFF9F6 100%);
 }
 
 .gradient-rose {
@@ -98,7 +100,7 @@
 
 .gold-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, #D4AF7A, transparent);
+  background: linear-gradient(90deg, transparent, #D8B26E, transparent);
 }
 
 /* Floating petal animation */
