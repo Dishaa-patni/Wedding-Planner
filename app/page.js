@@ -79,23 +79,24 @@ const faqs = [
 ]
 
 /* ============================================================
-   Petal shower — soft, low opacity, blush + champagne + cream
+   Petal shower — teardrop petals only, soft & luxurious
 ============================================================ */
 function Petals() {
   const [petals, setPetals] = useState([])
   useEffect(() => {
-    const palette = ['#EAC7CE', '#F6DDE1', '#FBE9CF', '#D8B26E', '#F0D6D6', '#FFFFFF']
-    const arr = Array.from({ length: 34 }).map((_, i) => ({
+    const palette = ['#EAC7CE', '#F6DDE1', '#FBE9CF', '#D8B26E', '#F0D6D6', '#FADCDE', '#E7B7B0', '#F5CBD1']
+    const arr = Array.from({ length: 38 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 22,
-      duration: 18 + Math.random() * 22,
-      size: 10 + Math.random() * 20,
-      shape: i % 4,
+      duration: 20 + Math.random() * 22,
+      size: 12 + Math.random() * 20,
       hue: palette[Math.floor(Math.random() * palette.length)],
       hue2: palette[Math.floor(Math.random() * palette.length)],
-      swayX: 30 + Math.random() * 120,
-      opacity: 0.35 + Math.random() * 0.35,
+      swayX: 30 + Math.random() * 140,
+      opacity: 0.4 + Math.random() * 0.4,
+      variant: i % 3,
+      tilt: Math.random() * 60 - 30,
     }))
     setPetals(arr)
   }, [])
@@ -106,67 +107,53 @@ function Petals() {
         const style = {
           left: `${p.left}%`,
           width: `${p.size}px`,
-          height: `${p.size}px`,
+          height: `${p.size * 1.35}px`,
           animationDelay: `-${p.delay}s`,
           animationDuration: `${p.duration}s`,
           '--sway-x': `${p.swayX}px`,
           opacity: p.opacity,
+          transform: `rotate(${p.tilt}deg)`,
         }
-        if (p.shape === 1) {
+        if (p.variant === 0) {
+          // Classic teardrop petal with subtle gradient
           return (
-            <svg key={p.id} viewBox="0 0 40 40" className="petal" style={style}>
-              <g>
-                {[...Array(5)].map((_, k) => {
-                  const a = (k * 72 * Math.PI) / 180
-                  return (
-                    <ellipse
-                      key={k}
-                      cx={20 + Math.cos(a) * 8}
-                      cy={20 + Math.sin(a) * 8}
-                      rx="7" ry="10"
-                      fill={p.hue}
-                      transform={`rotate(${k * 72} ${20 + Math.cos(a) * 8} ${20 + Math.sin(a) * 8})`}
-                    />
-                  )
-                })}
-                <circle cx="20" cy="20" r="3" fill={p.hue2} />
-              </g>
+            <svg key={p.id} viewBox="0 0 24 32" className="petal" style={style}>
+              <defs>
+                <linearGradient id={`pg-${p.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={p.hue2} stopOpacity="0.9" />
+                  <stop offset="100%" stopColor={p.hue} stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <path d="M12 1 C 19 9, 22 18, 12 31 C 2 18, 5 9, 12 1 Z" fill={`url(#pg-${p.id})`} />
+              <path d="M12 4 C 15 12, 15 20, 12 28" stroke={p.hue2} strokeWidth="0.5" fill="none" opacity="0.5" />
             </svg>
           )
         }
-        if (p.shape === 2) {
+        if (p.variant === 1) {
+          // Curved rose-petal shape
           return (
-            <svg key={p.id} viewBox="0 0 40 40" className="petal" style={style}>
-              <g>
-                {[...Array(6)].map((_, k) => {
-                  const a = (k * 60 * Math.PI) / 180
-                  return (
-                    <ellipse
-                      key={k}
-                      cx={20 + Math.cos(a) * 5}
-                      cy={20 + Math.sin(a) * 5}
-                      rx="5" ry="8"
-                      fill={p.hue}
-                      opacity="0.85"
-                      transform={`rotate(${k * 60} ${20 + Math.cos(a) * 5} ${20 + Math.sin(a) * 5})`}
-                    />
-                  )
-                })}
-                <circle cx="20" cy="20" r="2" fill={p.hue2} />
-              </g>
+            <svg key={p.id} viewBox="0 0 28 32" className="petal" style={style}>
+              <defs>
+                <linearGradient id={`pg-${p.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={p.hue2} stopOpacity="0.85" />
+                  <stop offset="100%" stopColor={p.hue} stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              <path d="M14 2 C 24 8, 26 20, 20 30 C 15 26, 10 26, 6 30 C 2 22, 6 10, 14 2 Z" fill={`url(#pg-${p.id})`} />
+              <path d="M14 5 C 16 12, 15 22, 13 28" stroke={p.hue2} strokeWidth="0.4" fill="none" opacity="0.4" />
             </svg>
           )
         }
-        if (p.shape === 3) {
-          return (
-            <svg key={p.id} viewBox="0 0 24 24" className="petal" style={style}>
-              <circle cx="12" cy="12" r="4" fill={p.hue} />
-            </svg>
-          )
-        }
+        // Elongated slender petal
         return (
-          <svg key={p.id} viewBox="0 0 24 24" className="petal" style={style} fill={p.hue}>
-            <path d="M12 2 C 17 8, 20 13, 12 22 C 4 13, 7 8, 12 2 Z" />
+          <svg key={p.id} viewBox="0 0 20 36" className="petal" style={style}>
+            <defs>
+              <linearGradient id={`pg-${p.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor={p.hue2} stopOpacity="0.85" />
+                <stop offset="100%" stopColor={p.hue} stopOpacity="1" />
+              </linearGradient>
+            </defs>
+            <path d="M10 1 C 17 12, 16 24, 10 35 C 4 24, 3 12, 10 1 Z" fill={`url(#pg-${p.id})`} />
           </svg>
         )
       })}
@@ -279,15 +266,11 @@ function Hero() {
 
   return (
     <section ref={ref} className="relative overflow-hidden pt-32 md:pt-40 pb-20 md:pb-28">
-      {/* Watercolor floral corners — parallax */}
-      <motion.div style={{ y: floralY }} className="absolute inset-0 pointer-events-none">
-        <FloralCorner position="tl" size="lg" className="opacity-90" />
-        <FloralCorner position="tr" size="lg" className="opacity-90" />
-      </motion.div>
+      {/* Background florals now come from the site-wide bg image; keep hero clean */}
 
       {/* subtle radial glow */}
       <div aria-hidden className="absolute inset-0 -z-10"
-        style={{ background: 'radial-gradient(1000px 500px at 15% 20%, rgba(216,178,110,0.14), transparent 60%), radial-gradient(900px 500px at 85% 30%, rgba(234,199,206,0.35), transparent 60%)' }} />
+        style={{ background: 'radial-gradient(1000px 500px at 15% 20%, rgba(216,178,110,0.10), transparent 60%), radial-gradient(900px 500px at 85% 30%, rgba(234,199,206,0.20), transparent 60%)' }} />
 
       <div className="container mx-auto px-4 md:px-6 relative">
         <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
@@ -559,7 +542,6 @@ function TrustedStrip() {
 function Features() {
   return (
     <section id="features" className="relative py-24 md:py-32">
-      <FloralCorner position="tr" size="md" className="opacity-70" />
       <div className="container mx-auto px-4 md:px-6 relative">
         <motion.div
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-100px' }}
@@ -882,7 +864,6 @@ function Testimonials() {
 function Pricing() {
   return (
     <section id="pricing" className="relative py-24 md:py-32">
-      <FloralCorner position="bl" size="md" className="opacity-70" />
       <div className="container mx-auto px-4 md:px-6 relative">
         <motion.div
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
@@ -987,8 +968,6 @@ function CTA() {
         <div className="relative rounded-3xl overflow-hidden gradient-rose p-10 md:p-16 text-center text-white shadow-2xl">
           <div aria-hidden className="absolute inset-0 opacity-30"
             style={{ background: 'radial-gradient(400px 200px at 20% 30%, rgba(255,255,255,0.4), transparent 60%), radial-gradient(400px 200px at 80% 70%, rgba(255,220,180,0.5), transparent 60%)' }} />
-          <FloralCorner position="tl" size="sm" className="opacity-25" />
-          <FloralCorner position="br" size="sm" className="opacity-25" />
           <motion.div
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             transition={{ duration: 0.7 }}
@@ -1019,7 +998,6 @@ function CTA() {
 function Footer() {
   return (
     <footer className="relative pt-16 pb-8 border-t border-[#EAC7CE]/30 bg-white/40 backdrop-blur">
-      <FloralCorner position="br" size="md" className="opacity-40" />
       <div className="container mx-auto px-4 md:px-6 relative">
         <div className="grid md:grid-cols-5 gap-10">
           <div className="md:col-span-2">
@@ -1076,7 +1054,28 @@ function Footer() {
 ============================================================ */
 const App = () => {
   return (
-    <div className="relative min-h-screen bg-background overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* Site-wide watercolor floral background */}
+      <div
+        aria-hidden
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url('https://customer-assets-39nsmqrw.emergentagent.net/job_weddings-hub-7/artifacts/wshm155x_ChatGPT%20Image%20Jul%2015%2C%202026%2C%2009_38_19%20PM.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          opacity: 0.95,
+        }}
+      />
+      {/* Soft ivory wash so content stays readable */}
+      <div
+        aria-hidden
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{
+          background: 'linear-gradient(180deg, rgba(255,249,246,0.15) 0%, rgba(255,249,246,0.35) 55%, rgba(255,249,246,0.5) 100%)',
+        }}
+      />
       <Petals />
       <Navbar />
       <main className="relative z-10">
