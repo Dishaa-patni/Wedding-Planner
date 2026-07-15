@@ -1065,7 +1065,7 @@ const App = () => {
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'fixed',
-          opacity: 0.95,
+          opacity: 0.45,
         }}
       />
       {/* Soft ivory wash so content stays readable */}
@@ -1073,7 +1073,7 @@ const App = () => {
         aria-hidden
         className="fixed inset-0 pointer-events-none z-0"
         style={{
-          background: 'linear-gradient(180deg, rgba(255,249,246,0.15) 0%, rgba(255,249,246,0.35) 55%, rgba(255,249,246,0.5) 100%)',
+          background: 'linear-gradient(180deg, rgba(255,249,246,0.55) 0%, rgba(255,249,246,0.7) 50%, rgba(255,249,246,0.75) 100%)',
         }}
       />
       <Petals />
