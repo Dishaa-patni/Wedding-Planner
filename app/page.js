@@ -529,117 +529,122 @@ function WeddingWorkspace() {
       {/* FLOATING NOTIFICATION CARDS */}
       {/* 1. Ceremony begins in 2 hours — top-left */}
       <motion.div
-        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5, duration: 0.6 }}
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
+        transition={{
+          opacity: { delay: 0.5, duration: 0.6 },
+          scale: { delay: 0.5, duration: 0.6 },
+          y: { duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.1 },
+        }}
+        className="absolute -left-4 md:-left-10 top-2 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[190px] z-20"
       >
-        <motion.div
-          animate={{ y: [0, -8, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -left-4 md:-left-10 top-2 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[190px] z-20"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#EAC7CE] flex items-center justify-center flex-shrink-0">
-              <CalendarClock className="w-4 h-4 text-[#B76E79]" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Ceremony</div>
-              <div className="text-xs font-semibold">Begins in 2 hours</div>
-              <div className="text-[10px] text-foreground/60">Haldi · 4:00 PM</div>
-            </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-[#EAC7CE] flex items-center justify-center flex-shrink-0">
+            <CalendarClock className="w-4 h-4 text-[#B76E79]" />
           </div>
-        </motion.div>
+          <div className="min-w-0">
+            <div className="text-[9px] uppercase tracking-widest text-foreground/50">Ceremony</div>
+            <div className="text-xs font-semibold">Begins in 2 hours</div>
+            <div className="text-[10px] text-foreground/60">Haldi · 4:00 PM</div>
+          </div>
+        </div>
       </motion.div>
 
       {/* 2. Decor team checked in — top-right */}
       <motion.div
-        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1, y: [0, 8, 0] }}
+        transition={{
+          opacity: { delay: 0.6, duration: 0.6 },
+          scale: { delay: 0.6, duration: 0.6 },
+          y: { duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1.2 },
+        }}
+        className="absolute -right-2 md:-right-8 top-24 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
       >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
-          className="absolute -right-2 md:-right-8 top-24 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#F6DDE1] flex items-center justify-center flex-shrink-0">
-              <Flower className="w-4 h-4 text-[#B76E79]" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendor Update</div>
-              <div className="text-xs font-semibold">Decor team checked in</div>
-              <div className="text-[10px] text-emerald-600">2 mins ago</div>
-            </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-[#F6DDE1] flex items-center justify-center flex-shrink-0">
+            <Flower className="w-4 h-4 text-[#B76E79]" />
           </div>
-        </motion.div>
+          <div className="min-w-0">
+            <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendor Update</div>
+            <div className="text-xs font-semibold">Decor team checked in</div>
+            <div className="text-[10px] text-emerald-600">2 mins ago</div>
+          </div>
+        </div>
       </motion.div>
 
       {/* 3. Photographer arrived — left middle */}
       <motion.div
-        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
+        transition={{
+          opacity: { delay: 0.7, duration: 0.6 },
+          scale: { delay: 0.7, duration: 0.6 },
+          y: { duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1.4 },
+        }}
+        className="absolute -left-6 md:-left-14 top-[45%] glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
       >
-        <motion.div
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          className="absolute -left-6 md:-left-14 top-[45%] glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center flex-shrink-0">
-              <Camera className="w-4 h-4 text-[#B08750]" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendor</div>
-              <div className="text-xs font-semibold">Photographer arrived</div>
-              <div className="text-[10px] text-foreground/60">On location</div>
-            </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center flex-shrink-0">
+            <Camera className="w-4 h-4 text-[#B08750]" />
           </div>
-        </motion.div>
+          <div className="min-w-0">
+            <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendor</div>
+            <div className="text-xs font-semibold">Photographer arrived</div>
+            <div className="text-[10px] text-foreground/60">On location</div>
+          </div>
+        </div>
       </motion.div>
 
       {/* 4. DJ Setup Completed — right middle */}
       <motion.div
-        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1, y: [0, 7, 0] }}
+        transition={{
+          opacity: { delay: 0.8, duration: 0.6 },
+          scale: { delay: 0.8, duration: 0.6 },
+          y: { duration: 6.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 },
+        }}
+        className="absolute -right-4 md:-right-12 top-[62%] glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
       >
-        <motion.div
-          animate={{ y: [0, 7, 0] }}
-          transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-          className="absolute -right-4 md:-right-12 top-[62%] glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#E6EEDD] flex items-center justify-center flex-shrink-0">
-              <Music className="w-4 h-4 text-[#6E8B6A]" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Task Complete</div>
-              <div className="text-xs font-semibold">DJ setup completed</div>
-              <div className="text-[10px] text-foreground/60">Sangeet stage ready</div>
-            </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-[#E6EEDD] flex items-center justify-center flex-shrink-0">
+            <Music className="w-4 h-4 text-[#6E8B6A]" />
           </div>
-        </motion.div>
+          <div className="min-w-0">
+            <div className="text-[9px] uppercase tracking-widest text-foreground/50">Task Complete</div>
+            <div className="text-xs font-semibold">DJ setup completed</div>
+            <div className="text-[10px] text-foreground/60">Sangeet stage ready</div>
+          </div>
+        </div>
       </motion.div>
 
       {/* 5. Payment Reminder — bottom center */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }}
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
+        transition={{
+          opacity: { delay: 0.9, duration: 0.6 },
+          scale: { delay: 0.9, duration: 0.6 },
+          y: { duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1.6 },
+        }}
+        className="absolute left-1/2 -translate-x-1/2 bottom-0 glass rounded-2xl px-4 py-3 shadow-xl w-[260px] z-20"
       >
-        <motion.div
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-          className="absolute left-1/2 -translate-x-1/2 bottom-0 glass rounded-2xl px-4 py-3 shadow-xl w-[260px] z-20"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center">
-                <IndianRupee className="w-4 h-4 text-[#B08750]" />
-              </div>
-              <div>
-                <div className="text-[9px] uppercase tracking-widest text-foreground/50">Payment Reminder</div>
-                <div className="font-display text-lg text-[#B76E79] leading-none mt-0.5">₹2,40,000</div>
-                <div className="text-[10px] text-foreground/60">Due in 3 days</div>
-              </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center">
+              <IndianRupee className="w-4 h-4 text-[#B08750]" />
             </div>
-            <Button size="sm" className="h-7 px-3 rounded-full bg-[#B76E79] hover:bg-[#a55e69] text-white text-[10px]">
-              Remind
-            </Button>
+            <div>
+              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Payment Reminder</div>
+              <div className="font-display text-lg text-[#B76E79] leading-none mt-0.5">₹2,40,000</div>
+              <div className="text-[10px] text-foreground/60">Due in 3 days</div>
+            </div>
           </div>
-        </motion.div>
+          <Button size="sm" className="h-7 px-3 rounded-full bg-[#B76E79] hover:bg-[#a55e69] text-white text-[10px]">
+            Remind
+          </Button>
+        </div>
       </motion.div>
     </div>
   )
