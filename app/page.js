@@ -12,9 +12,28 @@ import {
   Heart, Users, ClipboardList, Store, CheckSquare, Wallet, CalendarDays,
   Sparkles, Menu, X, Check, Star, ArrowRight, ChevronRight, Play, Shield,
   TrendingUp, Bell, Flower2, Upload, CalendarClock, UserCheck, Flower,
-  BellRing, IndianRupee, FileSpreadsheet
+  BellRing, IndianRupee, FileSpreadsheet, Camera, Music, Utensils, Palette
 } from 'lucide-react'
 import { FloralCorner } from '@/components/floral'
+
+/* Count-up hook */
+function useCountUp(end, duration = 1400, start = 0) {
+  const [value, setValue] = useState(start)
+  useEffect(() => {
+    let raf
+    let startTs
+    const step = (ts) => {
+      if (!startTs) startTs = ts
+      const p = Math.min((ts - startTs) / duration, 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setValue(Math.round(start + (end - start) * eased))
+      if (p < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [end, duration, start])
+  return value
+}
 
 /* ============================================================
    Data
@@ -249,6 +268,384 @@ function Navbar() {
 }
 
 /* ============================================================
+   Wedding Workspace — the interactive SaaS hero card
+============================================================ */
+function CircularProgress({ value = 72, size = 88, stroke = 8 }) {
+  const [progress, setProgress] = useState(0)
+  useEffect(() => {
+    const t = setTimeout(() => setProgress(value), 200)
+    return () => clearTimeout(t)
+  }, [value])
+  const r = (size - stroke) / 2
+  const c = 2 * Math.PI * r
+  const offset = c - (progress / 100) * c
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <defs>
+          <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#B76E79" />
+            <stop offset="100%" stopColor="#D8B26E" />
+          </linearGradient>
+        </defs>
+        <circle cx={size/2} cy={size/2} r={r} stroke="#F1D9DE" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size/2} cy={size/2} r={r}
+          stroke="url(#ring-grad)" strokeWidth={stroke} fill="none"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={offset}
+          style={{ transition: 'stroke-dashoffset 1.6s cubic-bezier(.2,.8,.2,1)' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="font-display text-xl leading-none text-[#B76E79]">{progress}%</div>
+        <div className="text-[8px] uppercase tracking-widest text-foreground/50 mt-0.5">Progress</div>
+      </div>
+    </div>
+  )
+}
+
+function AnimatedBar({ pct, delay = 0, color = 'gradient-rose' }) {
+  const [w, setW] = useState(0)
+  useEffect(() => {
+    const t = setTimeout(() => setW(pct), 200 + delay)
+    return () => clearTimeout(t)
+  }, [pct, delay])
+  return (
+    <div className="h-1.5 rounded-full bg-[#F1D9DE]/70 overflow-hidden">
+      <div
+        className={`h-full ${color} rounded-full`}
+        style={{ width: `${w}%`, transition: 'width 1.4s cubic-bezier(.2,.8,.2,1)' }}
+      />
+    </div>
+  )
+}
+
+function WeddingWorkspace() {
+  const guests = useCountUp(520, 1400)
+  const pending = useCountUp(18, 1200)
+  const budgetLakhs = useCountUp(184, 1600) // display as 18.4
+  const budgetUtil = useCountUp(65, 1300)
+  const team = useCountUp(14, 1100)
+
+  const timelineItems = [
+    { name: 'Haldi', status: 'done', icon: '🌼' },
+    { name: 'Mehendi', status: 'today', icon: '🌿' },
+    { name: 'Sangeet', status: 'tomorrow', icon: '🎵' },
+    { name: 'Reception', status: 'upcoming', icon: '💫' },
+  ]
+
+  const vendors = [
+    { name: 'Photographer', icon: Camera, status: 'done' },
+    { name: 'Decorator', icon: Palette, status: 'done' },
+    { name: 'Catering', icon: Utensils, status: 'done' },
+    { name: 'Makeup', icon: Sparkles, status: 'pending' },
+  ]
+
+  return (
+    <div className="relative mx-auto w-full max-w-[440px] h-[620px] md:h-[640px]">
+      {/* Soft glow behind */}
+      <div className="absolute -inset-10 -z-10">
+        <div className="absolute top-6 -left-6 w-52 h-52 rounded-full bg-[#EAC7CE]/55 blur-3xl"/>
+        <div className="absolute -bottom-6 -right-6 w-64 h-64 rounded-full bg-[#D8B26E]/40 blur-3xl"/>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#F6DDE1]/40 blur-3xl"/>
+      </div>
+
+      {/* MAIN WORKSPACE CARD */}
+      <motion.div
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+        className="absolute inset-x-6 top-4 bottom-6"
+      >
+        <div className="glass-strong rounded-[1.75rem] p-4 md:p-5 h-full border border-[#B76E79]/15 relative overflow-hidden">
+          {/* glass reflection sheen */}
+          <div aria-hidden className="absolute top-0 left-0 right-0 h-24 pointer-events-none"
+            style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.5), transparent)' }} />
+
+          {/* Window controls */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#B76E79]/60"/>
+              <span className="w-2 h-2 rounded-full bg-[#D8B26E]/60"/>
+              <span className="w-2 h-2 rounded-full bg-[#EAC7CE]"/>
+            </div>
+            <div className="text-[9px] tracking-[0.25em] uppercase text-foreground/40">Vivaha · Workspace</div>
+            <div className="flex items-center gap-1 text-[9px] text-emerald-600">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/> Live
+            </div>
+          </div>
+
+          {/* Header — couple + progress ring */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-[#B76E79]/80">
+                <Heart className="w-3 h-3 fill-[#B76E79] text-[#B76E79]" /> Active Wedding
+              </div>
+              <div className="font-display text-2xl md:text-[1.7rem] leading-tight text-foreground mt-1">
+                Aarav <span className="text-[#B76E79]">&</span> Ananya
+              </div>
+              <div className="text-[11px] text-foreground/60 mt-0.5 flex items-center gap-1.5">
+                <CalendarDays className="w-3 h-3" /> 12 Dec 2026
+              </div>
+              <div className="text-[11px] text-foreground/60 flex items-center gap-1.5">
+                <span className="w-3 h-3 inline-flex items-center justify-center">📍</span> Umaid Bhawan Palace
+              </div>
+            </div>
+            <CircularProgress value={72} size={78} stroke={7} />
+          </div>
+
+          {/* Overall progress bar */}
+          <div className="mt-3">
+            <div className="flex justify-between text-[10px] text-foreground/60 mb-1">
+              <span className="uppercase tracking-widest">Wedding Progress</span>
+              <span className="text-[#B76E79] font-medium">72%</span>
+            </div>
+            <AnimatedBar pct={72} />
+          </div>
+
+          {/* Stat grid */}
+          <div className="mt-4 grid grid-cols-2 gap-2.5">
+            {/* Guests */}
+            <div className="bg-white/75 rounded-xl p-3 border border-white/70">
+              <div className="flex items-center justify-between">
+                <div className="text-[9px] uppercase tracking-widest text-foreground/50">Guests</div>
+                <Users className="w-3.5 h-3.5 text-[#B76E79]" />
+              </div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="font-display text-xl text-foreground leading-none">{guests}</span>
+                <span className="text-[10px] text-emerald-600">Confirmed</span>
+              </div>
+              <div className="text-[10px] text-foreground/60 mt-0.5">{pending} Pending</div>
+              <div className="mt-2">
+                <AnimatedBar pct={97} delay={200} />
+              </div>
+            </div>
+
+            {/* Budget */}
+            <div className="bg-white/75 rounded-xl p-3 border border-white/70">
+              <div className="flex items-center justify-between">
+                <div className="text-[9px] uppercase tracking-widest text-foreground/50">Budget</div>
+                <Wallet className="w-3.5 h-3.5 text-[#B76E79]" />
+              </div>
+              <div className="mt-1 flex items-baseline gap-1">
+                <span className="font-display text-xl text-foreground leading-none">₹{(budgetLakhs/10).toFixed(1)}L</span>
+              </div>
+              <div className="text-[10px] text-foreground/60 mt-0.5">{budgetUtil}% utilized</div>
+              {/* mini bars */}
+              <div className="mt-2 flex items-end gap-0.5 h-5">
+                {[35,55,42,68,50,72,60,80,65,58,74,66].map((h,i)=>(
+                  <motion.div
+                    key={i}
+                    initial={{ height: 0 }} animate={{ height: `${h}%` }}
+                    transition={{ delay: 0.6 + i*0.04, duration: 0.6 }}
+                    className="flex-1 rounded-t bg-gradient-to-t from-[#D8B26E]/60 to-[#B76E79]/80"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Team */}
+            <div className="bg-white/75 rounded-xl p-3 border border-white/70">
+              <div className="flex items-center justify-between">
+                <div className="text-[9px] uppercase tracking-widest text-foreground/50">Team</div>
+                <UserCheck className="w-3.5 h-3.5 text-[#B76E79]" />
+              </div>
+              <div className="mt-1 font-display text-xl text-foreground leading-none">{team} <span className="text-[10px] font-sans text-foreground/60">members</span></div>
+              <div className="mt-2 flex -space-x-1.5">
+                {['Priya','Aarav','Neha','Rahul','Mira','Kabir'].map((n,k)=>(
+                  <img key={k} alt="" src={`https://ui-avatars.com/api/?name=${n}&background=${k%2?'D8B26E':'B76E79'}&color=fff&size=48`} className="w-5 h-5 rounded-full border border-white"/>
+                ))}
+                <div className="w-5 h-5 rounded-full bg-[#F1D9DE] border border-white flex items-center justify-center text-[8px] text-[#B76E79] font-medium">+8</div>
+              </div>
+            </div>
+
+            {/* Vendors */}
+            <div className="bg-white/75 rounded-xl p-3 border border-white/70">
+              <div className="flex items-center justify-between">
+                <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendors</div>
+                <Store className="w-3.5 h-3.5 text-[#B76E79]" />
+              </div>
+              <ul className="mt-1.5 space-y-1">
+                {vendors.map((v,i)=>{
+                  const Icon = v.icon
+                  return (
+                    <motion.li key={v.name}
+                      initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + i*0.12, duration: 0.4 }}
+                      className="flex items-center gap-1.5 text-[10px]"
+                    >
+                      <Icon className="w-3 h-3 text-foreground/60"/>
+                      <span className="flex-1 truncate">{v.name}</span>
+                      {v.status === 'done'
+                        ? <Check className="w-3 h-3 text-emerald-600"/>
+                        : <span className="text-[9px] text-[#B08750] bg-[#FBE9CF] px-1.5 py-[1px] rounded-full">Pending</span>}
+                    </motion.li>
+                  )
+                })}
+              </ul>
+            </div>
+          </div>
+
+          {/* Timeline strip */}
+          <div className="mt-3 bg-white/75 rounded-xl p-3 border border-white/70">
+            <div className="flex items-center justify-between">
+              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Timeline</div>
+              <div className="text-[9px] text-foreground/50">4 events</div>
+            </div>
+            <div className="mt-2 relative">
+              <div className="absolute left-2 right-2 top-3 h-[2px] bg-[#F1D9DE]"/>
+              <motion.div
+                className="absolute left-2 top-3 h-[2px] gradient-rose rounded-full"
+                initial={{ width: 0 }} animate={{ width: '38%' }}
+                transition={{ delay: 0.8, duration: 1.2 }}
+              />
+              <div className="grid grid-cols-4 gap-1 relative">
+                {timelineItems.map((t,i)=>(
+                  <motion.div key={t.name}
+                    initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + i*0.18, duration: 0.5 }}
+                    className="flex flex-col items-center"
+                  >
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] border-2 border-white shadow-sm ${
+                      t.status === 'done' ? 'gradient-rose text-white'
+                      : t.status === 'today' ? 'bg-[#D8B26E] text-white'
+                      : 'bg-white text-foreground/40'
+                    }`}>
+                      {t.status === 'done' ? <Check className="w-3 h-3"/> : t.icon}
+                    </div>
+                    <div className="mt-1.5 text-[9px] font-medium text-foreground/80 text-center leading-tight">{t.name}</div>
+                    <div className="text-[8px] text-foreground/50 leading-tight capitalize">
+                      {t.status === 'done' ? 'Complete' : t.status}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* FLOATING NOTIFICATION CARDS */}
+      {/* 1. Ceremony begins in 2 hours — top-left */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5, duration: 0.6 }}
+      >
+        <motion.div
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -left-4 md:-left-10 top-2 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[190px] z-20"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#EAC7CE] flex items-center justify-center flex-shrink-0">
+              <CalendarClock className="w-4 h-4 text-[#B76E79]" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Ceremony</div>
+              <div className="text-xs font-semibold">Begins in 2 hours</div>
+              <div className="text-[10px] text-foreground/60">Haldi · 4:00 PM</div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* 2. Decor team checked in — top-right */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
+          className="absolute -right-2 md:-right-8 top-24 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#F6DDE1] flex items-center justify-center flex-shrink-0">
+              <Flower className="w-4 h-4 text-[#B76E79]" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendor Update</div>
+              <div className="text-xs font-semibold">Decor team checked in</div>
+              <div className="text-[10px] text-emerald-600">2 mins ago</div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* 3. Photographer arrived — left middle */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
+      >
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          className="absolute -left-6 md:-left-14 top-[45%] glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center flex-shrink-0">
+              <Camera className="w-4 h-4 text-[#B08750]" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendor</div>
+              <div className="text-xs font-semibold">Photographer arrived</div>
+              <div className="text-[10px] text-foreground/60">On location</div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* 4. DJ Setup Completed — right middle */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
+      >
+        <motion.div
+          animate={{ y: [0, 7, 0] }}
+          transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
+          className="absolute -right-4 md:-right-12 top-[62%] glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#E6EEDD] flex items-center justify-center flex-shrink-0">
+              <Music className="w-4 h-4 text-[#6E8B6A]" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[9px] uppercase tracking-widest text-foreground/50">Task Complete</div>
+              <div className="text-xs font-semibold">DJ setup completed</div>
+              <div className="text-[10px] text-foreground/60">Sangeet stage ready</div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* 5. Payment Reminder — bottom center */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }}
+      >
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-0 glass rounded-2xl px-4 py-3 shadow-xl w-[260px] z-20"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center">
+                <IndianRupee className="w-4 h-4 text-[#B08750]" />
+              </div>
+              <div>
+                <div className="text-[9px] uppercase tracking-widest text-foreground/50">Payment Reminder</div>
+                <div className="font-display text-lg text-[#B76E79] leading-none mt-0.5">₹2,40,000</div>
+                <div className="text-[10px] text-foreground/60">Due in 3 days</div>
+              </div>
+            </div>
+            <Button size="sm" className="h-7 px-3 rounded-full bg-[#B76E79] hover:bg-[#a55e69] text-white text-[10px]">
+              Remind
+            </Button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  )
+}
+
+/* ============================================================
    Hero — headline + floating widgets around wedding image
 ============================================================ */
 function Hero() {
@@ -327,7 +724,7 @@ function Hero() {
             </div>
           </motion.div>
 
-          {/* RIGHT — Wedding image + floating UI widgets */}
+          {/* RIGHT — Wedding Workspace Card + floating notifications */}
           <motion.div
             style={{ y: yRight }}
             initial={{ opacity: 0, scale: 0.94, y: 40 }}
@@ -335,181 +732,7 @@ function Hero() {
             transition={{ duration: 1, delay: 0.2, ease: 'easeOut' }}
             className="lg:col-span-5 relative"
           >
-            <div className="relative mx-auto w-full max-w-[420px] h-[540px] md:h-[580px]">
-              {/* Glow */}
-              <div className="absolute -inset-8 -z-10">
-                <div className="absolute top-4 -left-6 w-40 h-40 rounded-full bg-[#EAC7CE]/45 blur-3xl"/>
-                <div className="absolute -bottom-6 -right-6 w-56 h-56 rounded-full bg-[#D8B26E]/35 blur-3xl"/>
-              </div>
-
-              {/* Central glass card with carousel */}
-              <div className="absolute inset-x-8 top-6 bottom-16 float-slow">
-                <div className="glass-strong rounded-[1.75rem] p-3 h-full">
-                  <div className="relative rounded-[1.35rem] overflow-hidden h-full shadow-inner">
-                    <AnimatePresence mode="wait">
-                      <motion.img
-                        key={idx}
-                        src={weddingImages[idx].src}
-                        alt={weddingImages[idx].label}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        initial={{ opacity: 0, scale: 1.08 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.02 }}
-                        transition={{ duration: 1 }}
-                      />
-                    </AnimatePresence>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
-
-                    {/* Ribbon */}
-                    <div className="absolute top-3 left-3">
-                      <div className="glass px-2.5 py-1 rounded-full text-[10px] text-foreground/80 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#B76E79] animate-pulse" /> Live board
-                      </div>
-                    </div>
-
-                    {/* Bottom label + dots */}
-                    <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-3">
-                      <div className="text-white drop-shadow">
-                        <div className="text-[9px] tracking-[0.25em] uppercase opacity-80">Now Showing</div>
-                        <div className="font-display text-lg md:text-xl leading-tight">{weddingImages[idx].label}</div>
-                      </div>
-                      <div className="flex gap-1">
-                        {weddingImages.map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setIdx(i)}
-                            className={`h-1 rounded-full transition-all ${i===idx ? 'w-4 bg-white' : 'w-1 bg-white/50 hover:bg-white/80'}`}
-                            aria-label={`slide ${i+1}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating widgets */}
-              {/* 1. Upcoming Ceremony — top left */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5, duration: 0.6 }}
-              >
-                <motion.div
-                  animate={{ y: [0, -8, 0] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute -left-3 md:-left-8 top-2 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[190px] z-20"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#EAC7CE] flex items-center justify-center flex-shrink-0">
-                      <CalendarClock className="w-4 h-4 text-[#B76E79]" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-widest text-foreground/50">Upcoming Ceremony</div>
-                      <div className="text-xs font-semibold truncate">Aditi & Karthik</div>
-                      <div className="text-[10px] text-foreground/60">28 Dec · Udaipur</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-
-              {/* 2. Guests Confirmed — top right */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6, duration: 0.6 }}
-              >
-                <motion.div
-                  animate={{ y: [0, 8, 0] }}
-                  transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
-                  className="absolute -right-2 md:-right-6 top-24 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[170px] z-20"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center flex-shrink-0">
-                      <UserCheck className="w-4 h-4 text-[#B08750]" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-widest text-foreground/50">Guests Confirmed</div>
-                      <div className="text-sm font-display text-[#B76E79]">312<span className="text-[10px] text-foreground/50">/320</span></div>
-                      <div className="h-1 mt-1 bg-foreground/10 rounded-full overflow-hidden">
-                        <div className="h-full w-[97%] gradient-rose"/>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-
-              {/* 3. Vendor Reminder — left middle */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
-              >
-                <motion.div
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                  className="absolute -left-4 md:-left-10 top-1/2 -translate-y-1/2 glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#F6DDE1] flex items-center justify-center flex-shrink-0">
-                      <Flower className="w-4 h-4 text-[#B76E79]" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-widest text-foreground/50">Vendor Reminder</div>
-                      <div className="text-xs font-semibold">Florist call</div>
-                      <div className="text-[10px] text-foreground/60">Today · 4:00 PM</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-
-              {/* 4. Team Assigned — right middle */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8, duration: 0.6 }}
-              >
-                <motion.div
-                  animate={{ y: [0, 7, 0] }}
-                  transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-                  className="absolute -right-4 md:-right-10 top-[58%] glass rounded-2xl px-3.5 py-2.5 shadow-xl w-[180px] z-20"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#E6EEDD] flex items-center justify-center flex-shrink-0">
-                      <CheckSquare className="w-4 h-4 text-[#6E8B6A]" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[9px] uppercase tracking-widest text-foreground/50">Team Assigned</div>
-                      <div className="text-xs font-semibold">Priya + 4 coordinators</div>
-                      <div className="flex -space-x-1.5 mt-1">
-                        {['Priya','Aarav','Neha','Rahul','Mira'].map((n,k)=>(
-                          <img key={k} alt="" src={`https://ui-avatars.com/api/?name=${n}&background=${k%2?'D8B26E':'B76E79'}&color=fff&size=48`} className="w-5 h-5 rounded-full border border-white"/>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-
-              {/* 5. Pending Payment — bottom center */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }}
-              >
-                <motion.div
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-                  className="absolute left-1/2 -translate-x-1/2 bottom-0 glass rounded-2xl px-4 py-3 shadow-xl w-[240px] z-20"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-[#FBE9CF] flex items-center justify-center">
-                        <IndianRupee className="w-4 h-4 text-[#B08750]" />
-                      </div>
-                      <div>
-                        <div className="text-[9px] uppercase tracking-widest text-foreground/50">Pending Payment</div>
-                        <div className="font-display text-lg text-[#B76E79] leading-none mt-0.5">₹2,40,000</div>
-                        <div className="text-[10px] text-foreground/60">Due in 3 days</div>
-                      </div>
-                    </div>
-                    <Button size="sm" className="h-7 px-3 rounded-full bg-[#B76E79] hover:bg-[#a55e69] text-white text-[10px]">
-                      Remind
-                    </Button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            </div>
+            <WeddingWorkspace />
           </motion.div>
         </div>
       </div>
