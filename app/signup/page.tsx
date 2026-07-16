@@ -1,22 +1,12 @@
 import type { Metadata } from 'next'
-import { Background, Petals } from '@/components/shared'
-import { Navbar, Footer } from '@/components/landing'
+import { AuthLayout, SignupForm } from '@/components/auth'
 
-export const metadata: Metadata = { title: 'Sign up — Vivaha' }
+export const metadata: Metadata = { title: 'Create your workspace — Vivaha' }
 
 export default function SignupPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <Background />
-      <Petals />
-      <Navbar />
-      <main className="relative z-10 pt-40 pb-24 container mx-auto px-4">
-        <div className="max-w-md mx-auto glass-strong rounded-2xl p-8 text-center">
-          <h1 className="font-display text-3xl text-[#B76E79]">Create your studio</h1>
-          <p className="mt-3 text-foreground/70">Signup flow coming soon.</p>
-        </div>
-      </main>
-      <Footer />
-    </div>
+    <AuthLayout>
+      <SignupForm />
+    </AuthLayout>
   )
 }

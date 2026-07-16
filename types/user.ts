@@ -1,9 +1,9 @@
-export type UserRole = 'planner' | 'coordinator' | 'assistant' | 'admin'
+export type TeamMemberRole = 'planner' | 'coordinator' | 'assistant' | 'owner'
 
 export interface User {
   id: string
   name: string
   email: string
-  role: UserRole
+  role: TeamMemberRole
   avatar?: string
 }
