@@ -1,7 +1,7 @@
 import './globals.css'
 import type { ReactNode } from 'react'
 import type { Metadata } from 'next'
-import { Providers } from './providers'
+import { Providers } from '@/providers'
 import { Playfair_Display, Inter } from 'next/font/google'
 
 const playfair = Playfair_Display({

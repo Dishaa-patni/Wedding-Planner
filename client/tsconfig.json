@@ -21,9 +21,9 @@
       "@/components/*": ["./components/*"],
       "@/lib/*": ["./lib/*"],
       "@/hooks/*": ["./hooks/*"],
-      "@/constants/*": ["./constants/*"],
-      "@/types/*": ["./types/*"],
-      "@/utils/*": ["./utils/*"]
+      "@/constants": ["./constants"],
+      "@/types": ["./types"],
+      "@/utils": ["./utils"]
     }
   },
   "include": [
