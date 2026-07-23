@@ -28,6 +28,11 @@ type GoogleProfile = {
   fullName: string
 }
 
+type GoogleAuthResult = {
+  user: UserDocument
+  isNewUser: boolean
+}
+
 const refreshTokenCookieOptions: CookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -57,6 +62,8 @@ const getGoogleOAuthClient = () => {
   )
 }
 
+const getClientUrl = () => process.env.CLIENT_URL || 'http://localhost:3000'
+
 const getPublicUser = (user: UserDocument) => ({
   id: user.id,
   fullName: user.fullName,
@@ -84,7 +91,23 @@ const sendAuthResponse = (res: Response, statusCode: number, user: UserDocument,
   )
 }
 
-const findOrCreateGoogleUser = async ({ googleId, email, fullName }: GoogleProfile): Promise<UserDocument> => {
+const setRefreshTokenCookie = (res: Response, user: UserDocument) => {
+  const refreshToken = user.generateRefreshToken()
+
+  res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions)
+}
+
+const redirectToClientAuthCallback = (res: Response, user: UserDocument, isNewUser: boolean) => {
+  const accessToken = user.generateAccessToken()
+  const callbackUrl = new URL('/auth/callback', getClientUrl())
+
+  setRefreshTokenCookie(res, user)
+  res.redirect(
+    `${callbackUrl.toString()}#accessToken=${encodeURIComponent(accessToken)}&isNewUser=${String(isNewUser)}`,
+  )
+}
+
+const findOrCreateGoogleUser = async ({ googleId, email, fullName }: GoogleProfile): Promise<GoogleAuthResult> => {
   const existingUser = await UserModel.findOne({
     $or: [{ googleId }, { email }],
   })
@@ -102,15 +125,23 @@ const findOrCreateGoogleUser = async ({ googleId, email, fullName }: GoogleProfi
       await existingUser.save()
     }
 
-    return existingUser
+    return {
+      user: existingUser,
+      isNewUser: false,
+    }
   }
 
-  return UserModel.create({
+  const user = await UserModel.create({
     fullName,
     email,
     googleId,
     authProviders: ['google'],
   })
+
+  return {
+    user,
+    isNewUser: true,
+  }
 }
 
 export const registerUser = asyncHandler(async (req, res) => {
@@ -238,11 +269,11 @@ export const handleGoogleOAuthCallback = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Google email is not verified')
   }
 
-  const user = await findOrCreateGoogleUser({
+  const { user, isNewUser } = await findOrCreateGoogleUser({
     googleId: payload.sub,
     email: payload.email.toLowerCase(),
     fullName: payload.name || payload.email.split('@')[0],
   })
 
-  sendAuthResponse(res, 200, user, 'Google login successful')
+  redirectToClientAuthCallback(res, user, isNewUser)
 })
