@@ -8,11 +8,12 @@ type AppToastOptions = {
   description?: string
 }
 
-export const xxappToast = {
+export const appToast = {
   success({ title, description }: AppToastOptions) {
     toast({
       title,
       description,
+      className: 'border-[#86EFAC] bg-[#F0FDF4] text-[#14532D]',
     })
   },
 
