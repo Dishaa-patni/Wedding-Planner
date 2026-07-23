@@ -62,7 +62,7 @@ export default function SignupForm() {
   const onSubmit = async (values: SignupFormValues) => {
     await registerUser.mutateAsync(values)
     reset(INITIAL_FORM)
-    router.push('/dashboard')
+    router.push(values.role === USER_ROLES.ADMIN ? '/onboarding' : '/dashboard')
   }
 
   const onGoogleSignup = () => {
