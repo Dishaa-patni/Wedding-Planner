@@ -7,7 +7,7 @@ const SIGNUP_ROLES = [USER_ROLES.ADMIN, USER_ROLES.TEAM] as const
 export const signupSchema = z
   .object({
     role: z.enum(SIGNUP_ROLES),
-    companyName: z.string().optional(),
+    // companyName: z.string().optional(),
     ownerName: z.string().trim().min(1, 'Owner name is required'),
    email: z.email({
   error: 'Enter a valid email address',
@@ -28,13 +28,13 @@ export const signupSchema = z
       })
     }
 
-    if (data.role === USER_ROLES.ADMIN && !data.companyName?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['companyName'],
-        message: 'Company name is required',
-      })
-    }
+    // if (data.role === USER_ROLES.ADMIN && !data.companyName?.trim()) {
+    //   ctx.addIssue({
+    //     code: z.ZodIssueCode.custom,
+    //     path: ['companyName'],
+    //     message: 'Company name is required',
+    //   })
+    // }
 
     if (data.role === USER_ROLES.TEAM && !data.inviteCode?.trim()) {
       ctx.addIssue({

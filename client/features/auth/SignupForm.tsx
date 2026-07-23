@@ -15,10 +15,11 @@ import { GoogleIcon, OrDivider, FieldGroup } from './AuthPrimitives'
 import { signupSchema, type SignupFormValues } from './schemas'
 import { AUTH_COPY } from './constants'
 import { SITE, USER_ROLES } from '@/constants'
+import { useGoogleOAuth, useRegisterUser } from './hooks'
 
 const INITIAL_FORM: SignupFormValues = {
   role: USER_ROLES.ADMIN,
-  companyName: '',
+  // companyName: '',
   ownerName: '',
   email: '',
   password: '',
@@ -37,6 +38,8 @@ export default function SignupForm() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const registerUser = useRegisterUser()
+  const { startGoogleOAuth } = useGoogleOAuth()
   const {
     control,
     formState: { errors, isSubmitting, isValid },
@@ -54,12 +57,16 @@ export default function SignupForm() {
 
   const role = watch('role')
   const isTeam = role === USER_ROLES.TEAM
+  const isPending = isSubmitting || registerUser.isPending
 
-  const onSubmit = (values: SignupFormValues) => {
-    // eslint-disable-next-line no-console
-    console.log('Signup submit', values)
+  const onSubmit = async (values: SignupFormValues) => {
+    await registerUser.mutateAsync(values)
     reset(INITIAL_FORM)
     router.push('/dashboard')
+  }
+
+  const onGoogleSignup = () => {
+    startGoogleOAuth(isTeam ? getValues('inviteCode') : undefined)
   }
   const passwordField = register('password', {
     onChange: () => {
@@ -90,6 +97,7 @@ export default function SignupForm() {
       <Button
         type="button"
         variant="outline"
+        onClick={onGoogleSignup}
         className="w-full rounded-full py-6 border-[#B76E79]/25 bg-white hover:bg-white/95 text-[#2E2E2E] shadow-sm"
       >
         <GoogleIcon />
@@ -107,7 +115,7 @@ export default function SignupForm() {
       />
 
       <div className="space-y-4">
-        {!isTeam && (
+        {/* {!isTeam && (
           <FieldGroup label="Company Name" htmlFor="companyName">
             <Input
               id="companyName"
@@ -117,7 +125,7 @@ export default function SignupForm() {
             />
             <FieldError message={errors.companyName?.message} />
           </FieldGroup>
-        )}
+        )} */}
 
         <FieldGroup label={isTeam ? 'Full Name' : 'Owner Name'} htmlFor="ownerName">
           <Input
@@ -233,7 +241,7 @@ export default function SignupForm() {
 
       <Button
         type="submit"
-        disabled={!isValid || isSubmitting}
+        disabled={!isValid || isPending}
         className="w-full rounded-full py-6 bg-[#B76E79] hover:bg-[#a55e69] text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isTeam ? AUTH_COPY.signup.submitTeam : AUTH_COPY.signup.submit}

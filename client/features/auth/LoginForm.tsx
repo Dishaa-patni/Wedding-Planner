@@ -15,6 +15,7 @@ import { GoogleIcon, OrDivider, FieldGroup } from './AuthPrimitives'
 import { AUTH_COPY } from './constants'
 import { loginSchema, type LoginFormValues } from './schemas'
 import { USER_ROLES } from '@/constants'
+import { useGoogleOAuth, useLoginUser } from './hooks'
 
 const INITIAL_FORM: LoginFormValues = {
   role: USER_ROLES.ADMIN,
@@ -31,6 +32,8 @@ function FieldError({ message }: { message?: string }) {
 export default function LoginForm() {
   const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const loginUser = useLoginUser()
+  const { startGoogleOAuth } = useGoogleOAuth()
   const {
     control,
     formState: { errors, isSubmitting, isValid },
@@ -42,10 +45,10 @@ export default function LoginForm() {
     mode: 'onChange',
     resolver: zodResolver(loginSchema),
   })
+  const isPending = isSubmitting || loginUser.isPending
 
-  const onSubmit = (values: LoginFormValues) => {
-    // eslint-disable-next-line no-console
-    console.log('Login submit', values)
+  const onSubmit = async (values: LoginFormValues) => {
+    await loginUser.mutateAsync(values)
     reset(INITIAL_FORM)
     router.push('/dashboard')
   }
@@ -69,6 +72,7 @@ export default function LoginForm() {
       <Button
         type="button"
         variant="outline"
+        onClick={() => startGoogleOAuth()}
         className="w-full rounded-full py-6 border-[#B76E79]/25 bg-white hover:bg-white/95 text-[#2E2E2E] shadow-sm"
       >
         <GoogleIcon />
@@ -125,7 +129,7 @@ export default function LoginForm() {
 
       <Button
         type="submit"
-        disabled={!isValid || isSubmitting}
+        disabled={!isValid || isPending}
         className="w-full rounded-full py-6 bg-[#B76E79] hover:bg-[#a55e69] text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {AUTH_COPY.login.submit}
