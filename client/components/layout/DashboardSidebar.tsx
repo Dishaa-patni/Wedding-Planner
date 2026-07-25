@@ -20,6 +20,8 @@ import { SITE } from '@/constants'
 
 interface DashboardSidebarProps {
   className?: string
+  organizationName: string  
+  ownerName : string
   onNavigate?: () => void
 }
 
@@ -35,7 +37,7 @@ const NAV_ITEMS = [
   { label: 'Settings', href: '/settings', icon: Settings },
 ] as const
 
-export default function DashboardSidebar({ className = '', onNavigate }: DashboardSidebarProps) {
+export default function DashboardSidebar({ className = '', ownerName , organizationName, onNavigate }: DashboardSidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -91,8 +93,8 @@ export default function DashboardSidebar({ className = '', onNavigate }: Dashboa
             AR
           </div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-[#3B2928]">Ananya Rao</div>
-            <div className="truncate text-xs text-[#8A7B78]">Saanjh Weddings</div>
+            <div className="truncate text-sm font-semibold text-[#3B2928]">{ownerName}</div>
+            <div className="truncate text-xs text-[#8A7B78]">{organizationName}</div>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-[1fr_auto] gap-2">

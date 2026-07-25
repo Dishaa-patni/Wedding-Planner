@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Flower2, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useIsScrolled } from '@/hooks'
-import { NAV_LINKS, SITE } from '@/constants'
+import { NAV_LINKS, ROUTES, SITE } from '@/constants'
 
 export default function Navbar() {
   const [open, setOpen] = useState<boolean>(false)
@@ -50,13 +51,19 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2 md:gap-3">
             <Button
+              asChild
               variant="ghost"
               className="hidden sm:inline-flex text-foreground/80 hover:text-[#B76E79] hover:bg-white/60 rounded-full"
             >
-              Login
+              <Link href={ROUTES.login}>Login</Link>
             </Button>
-            <Button className="bg-[#B76E79] hover:bg-[#a55e69] text-white shadow-md hover:shadow-lg transition-all rounded-full px-4 md:px-5">
-              Start Free Trial <ArrowRight className="ml-1.5 h-4 w-4" />
+            <Button
+              asChild
+              className="bg-[#B76E79] hover:bg-[#a55e69] text-white shadow-md hover:shadow-lg transition-all rounded-full px-4 md:px-5"
+            >
+              <Link href={ROUTES.signup}>
+                Sign up <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Link>
             </Button>
             <button
               className="lg:hidden p-2 text-foreground/80"
@@ -86,12 +93,20 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <a
-                href="#"
+              <Link
+                href={ROUTES.login}
+                onClick={() => setOpen(false)}
                 className="block px-4 py-2.5 text-sm rounded-lg hover:bg-white/70 hover:text-[#B76E79]"
               >
                 Login
-              </a>
+              </Link>
+              <Link
+                href={ROUTES.signup}
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 text-sm rounded-lg bg-[#B76E79] text-white"
+              >
+                Sign up
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>

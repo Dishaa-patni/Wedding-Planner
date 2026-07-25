@@ -30,7 +30,6 @@ export interface RegisterUserRequest {
   email: string
   password: string
   confirmPassword: string
-  role?: BackendUserRole
 }
 
 export interface LoginUserRequest {

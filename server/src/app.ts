@@ -4,6 +4,8 @@ import { errorHandler } from './middlewares/error.middleware.js'
 import authRoutes from './modules/auth/auth.routes.js'
 import { ApiError } from './utils/api-error.js'
 import { ApiResponse } from './utils/api-response.js'
+import { organizationRoutes } from './modules/organizations/organization.routes.js'
+
 
 const app = express()
 
@@ -22,6 +24,7 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.use('/api/auth', authRoutes)
+app.use('/api/organizations', organizationRoutes)
 
 app.use((_req, _res, next) => {
   next(new ApiError(404, 'Route not found'))
