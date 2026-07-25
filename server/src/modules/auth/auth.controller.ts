@@ -1,7 +1,6 @@
 import { compare, hash } from 'bcryptjs'
 import type { CookieOptions, Response } from 'express'
 import { OAuth2Client } from 'google-auth-library'
-import { USER_ROLE_VALUES } from '../../constants/role.js'
 import { UserModel, type UserDocument, type UserRole } from '../users/user.model.js'
 import { ApiError } from '../../utils/api-error.js'
 import { ApiResponse } from '../../utils/api-response.js'
@@ -14,7 +13,6 @@ type RegisterUserBody = {
   email?: unknown
   password?: unknown
   confirmPassword?: unknown
-  role?: unknown
 }
 
 type LoginUserBody = {
@@ -40,9 +38,6 @@ const refreshTokenCookieOptions: CookieOptions = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 }
 
-const isValidUserRole = (role: unknown): role is UserRole => {
-  return typeof role === 'string' && USER_ROLE_VALUES.includes(role as UserRole)
-}
 
 const getRequiredEnv = (envKey: string): string => {
   const value = process.env[envKey]
@@ -145,7 +140,7 @@ const findOrCreateGoogleUser = async ({ googleId, email, fullName }: GoogleProfi
 }
 
 export const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, email, password, confirmPassword, role } = req.body as RegisterUserBody
+  const { fullName, email, password, confirmPassword } = req.body as RegisterUserBody
 
   if (typeof fullName !== 'string' || !fullName.trim()) {
     throw new ApiError(400, 'Full name is required')
@@ -171,9 +166,6 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Password and confirm password do not match')
   }
 
-  if (role !== undefined && !isValidUserRole(role)) {
-    throw new ApiError(400, 'Invalid user role')
-  }
 
   const normalizedEmail = email.trim().toLowerCase()
   const existingUser = await UserModel.findOne({ email: normalizedEmail })
@@ -188,7 +180,6 @@ export const registerUser = asyncHandler(async (req, res) => {
     email: normalizedEmail,
     passwordHash,
     authProviders: ['email'],
-    ...(role !== undefined ? { role } : {}),
   })
 
   sendAuthResponse(res, 201, user, 'User registered successfully')

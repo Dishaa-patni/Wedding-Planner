@@ -4,13 +4,21 @@ import { useState, type ReactNode } from 'react'
 import { Menu, Sparkles, X } from 'lucide-react'
 import { SITE } from '@/constants'
 import DashboardSidebar from './DashboardSidebar'
+import { useCurrentOrganization } from '@/features/onboarding/hooks/use-onboarding'
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const {data} = useCurrentOrganization()
+
+  const ownerName = data?.user.fullName ?? 'User'
+  const organizationName = data?.organization.name ?? 'Organization'
+
+  console.log(ownerName , organizationName)
 
   return (
     <div className="min-h-dvh bg-[#FFF7F4] text-[#3B2928] lg:flex">
-      <DashboardSidebar className="hidden lg:flex" />
+      <DashboardSidebar className="hidden lg:flex"   ownerName={ownerName}
+  organizationName={organizationName} />
 
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#F0DDD8] bg-[#FFF7F4]/92 px-4 backdrop-blur-xl sm:px-6 lg:hidden">
         <button
@@ -60,6 +68,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           </button>
           <DashboardSidebar
             className="h-full w-full overflow-y-auto border-r-0"
+            ownerName={ownerName}
+            organizationName={organizationName}
             onNavigate={() => setIsSidebarOpen(false)}
           />
         </div>

@@ -7,12 +7,16 @@ import { appToast } from '@/components/ui/app-toaster'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SITE } from '@/constants'
+import { useCreateOrganization } from './hooks/use-onboarding'
 
 export default function OrganizationOnboardingScreen() {
   const router = useRouter()
+const {
+  mutateAsync: createOrganization,
+  isPending,
+} = useCreateOrganization()
   const [organizationName, setOrganizationName] = useState('')
   const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const logoPreviewUrl = useMemo(() => {
     if (!logoFile) return null
@@ -28,8 +32,7 @@ export default function OrganizationOnboardingScreen() {
     }
   }, [logoPreviewUrl])
 
-  const canSubmit = organizationName.trim().length >= 2 && !isSubmitting
-
+  const canSubmit = organizationName.trim().length >= 2 && !isPending
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -41,11 +44,9 @@ export default function OrganizationOnboardingScreen() {
       return
     }
 
-    setIsSubmitting(true)
-
-    appToast.success({
-      title: 'Organization ready',
-      description: 'Next we will save this through the organization API.',
+    await createOrganization({
+      name: organizationName.trim(),
+      logoUrl: null
     })
 
     router.push('/dashboard')
@@ -166,7 +167,7 @@ export default function OrganizationOnboardingScreen() {
               disabled={!canSubmit}
               className="mt-7 h-12 w-full rounded-full bg-[#B76E79] text-white shadow-lg hover:bg-[#a55e69]"
             >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Continue to dashboard
             </Button>
           </form>
