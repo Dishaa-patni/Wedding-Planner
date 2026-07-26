@@ -8,17 +8,18 @@ import { useCurrentOrganization } from '@/features/onboarding/hooks/use-onboardi
 
 export default function DashboardShell({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const {data} = useCurrentOrganization()
+  const { data } = useCurrentOrganization()
 
   const ownerName = data?.user.fullName ?? 'User'
   const organizationName = data?.organization.name ?? 'Organization'
 
-  console.log(ownerName , organizationName)
-
   return (
     <div className="min-h-dvh bg-[#FFF7F4] text-[#3B2928] lg:flex">
-      <DashboardSidebar className="hidden lg:flex"   ownerName={ownerName}
-  organizationName={organizationName} />
+      <DashboardSidebar
+        className="fixed inset-y-0 left-0 z-30 hidden lg:flex"
+        ownerName={ownerName}
+        organizationName={organizationName}
+      />
 
       <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#F0DDD8] bg-[#FFF7F4]/92 px-4 backdrop-blur-xl sm:px-6 lg:hidden">
         <button
@@ -67,7 +68,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
             <X className="h-[18px] w-[18px]" />
           </button>
           <DashboardSidebar
-            className="h-full w-full overflow-y-auto border-r-0"
+            className="h-full w-full border-r-0"
             ownerName={ownerName}
             organizationName={organizationName}
             onNavigate={() => setIsSidebarOpen(false)}
@@ -75,7 +76,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 md:px-8 lg:px-10 lg:py-9 xl:px-12">
+      <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 md:px-8 lg:ml-[292px] lg:px-8 lg:py-7 xl:px-9">
         {children}
       </main>
     </div>
