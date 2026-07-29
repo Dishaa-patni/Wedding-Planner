@@ -27,7 +27,11 @@ const getBearerToken = (authorizationHeader?: string) => {
 }
 
 export const verifyJWT = asyncHandler(async (req, _res, next) => {
+   console.log('Authorization header:', req.headers.authorization)
   const token = getBearerToken(req.headers.authorization)
+
+    console.log('Extracted token:', token)
+  console.log('Token parts:', token?.split('.').length)
 
   if (!token) {
     throw new ApiError(401, 'Unauthorized')

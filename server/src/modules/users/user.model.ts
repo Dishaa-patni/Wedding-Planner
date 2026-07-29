@@ -93,7 +93,7 @@ userSchema.methods.generateAccessToken = function generateAccessToken() {
     },
     getJwtSecret('ACCESS_TOKEN_SECRET'),
     {
-      expiresIn: '15m',
+      expiresIn: '7d',
     },
   )
 }

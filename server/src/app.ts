@@ -5,6 +5,8 @@ import authRoutes from './modules/auth/auth.routes.js'
 import { ApiError } from './utils/api-error.js'
 import { ApiResponse } from './utils/api-response.js'
 import { organizationRoutes } from './modules/organizations/organization.routes.js'
+import { mediaCollectionRoute} from './modules/media-library/collections/collection.routes.js'
+import { mediaRoute } from './modules/media-library/media/media.routes.js'
 
 
 const app = express()
@@ -25,6 +27,9 @@ app.get('/api/health', (_req, res) => {
 
 app.use('/api/auth', authRoutes)
 app.use('/api/organizations', organizationRoutes)
+app.use('/api/v1/media-library', mediaCollectionRoute)
+app.use('/api/v1/media-library', mediaRoute)
+
 
 app.use((_req, _res, next) => {
   next(new ApiError(404, 'Route not found'))

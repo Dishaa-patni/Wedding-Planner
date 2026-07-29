@@ -1,6 +1,16 @@
-import {Schema , model , Types} from 'mongoose'
+import { Schema, model, Types, type HydratedDocument } from 'mongoose'
 
-const organizationSchema = new Schema(
+export interface Organization {
+  name: string
+  logoUrl: string | null
+  ownerId: Types.ObjectId
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type OrganizationDocument = HydratedDocument<Organization>
+
+const organizationSchema = new Schema<Organization>(
     {
       name:{
         type : String , 
@@ -16,7 +26,7 @@ const organizationSchema = new Schema(
       },
 
       ownerId: {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
         index: true
@@ -30,4 +40,4 @@ const organizationSchema = new Schema(
     }
 )
 
-export const OrganizationModel = model('Organization' , organizationSchema )
+export const OrganizationModel = model<Organization>('Organization' , organizationSchema )
