@@ -4,6 +4,7 @@ import { ApiResponse } from "../../utils/api-response.js";
 import { asyncHandler } from "../../utils/async-handler.js";
 import { getUserOrganization } from "../../utils/helper.js";
 import { WeddingWorkspaceModel } from "./wedding-workspace.model.js";
+import {  MoodBoardSectionModel } from "./moodboards/moodboard-section.model.js";
 
 
 export const createWeddingWorkspace = asyncHandler(async(req , res)=>{
@@ -35,10 +36,22 @@ const existingWedding = await WeddingWorkspaceModel.findOne({
     createdBy: userId
   })
 
+  const defaultMoodboardSection = await MoodBoardSectionModel.create({
+  name: 'Client Inspiration',
+  normalizedName: 'client inspiration',
+  organizationId: organization._id,
+  weddingWorkspaceId: weddingWorkspace._id,
+  isDefault: true,
+  position: 0,
+  createdBy: userId,
+})
+
   res.status(201).json(
     new ApiResponse(
         201,
-        {weddingWorkspace},
+        {weddingWorkspace ,
+         defaultMoodboardSection
+        },
         'Wedding Workspace Created Successfully'
     )
   )

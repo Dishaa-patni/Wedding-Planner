@@ -62,4 +62,4 @@ weddingSchema.index(
   },
 )
 
-export const WeddingWorkspaceModel = model<Wedding>('Wedding', weddingSchema)
+export const WeddingWorkspaceModel = model<Wedding>('WeddingWorkspace', weddingSchema)
