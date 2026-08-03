@@ -115,7 +115,34 @@ export const getCollection = asyncHandler(async (req, res) => {
   // read the parent colection id from url query
   const { parentCollectionId } = req.query;
 
+//   MongoDB needs numbers for skip() and limit()
+// ?? 1 means default page is 1
+// ?? 4 means default limit is 4
+
+  const page = Number(req.query.page ?? 1)
+const limit = Number(req.query.limit ?? 4)
+
+if (!Number.isInteger(page) || page < 1) {
+  throw new ApiError(400, 'Page must be a positive number')
+}
+
+if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+  throw new ApiError(400, 'Limit must be between 1 and 50')
+}
+
   let parentId = null;
+
+  const filter = {
+  organizationId: organization._id,
+  parentCollectionId: parentId,
+}
+
+//count total collection
+const totalItems = await CollectionModel.countDocuments(filter)
+const totalPages = Math.ceil(totalItems/limit)
+const skip = (page - 1)* limit
+const hasPreviousPage = page>1
+const hasNextPage = page< totalPages
 
   if (typeof parentCollectionId === "string" && parentCollectionId) {
     if (!Types.ObjectId.isValid(parentCollectionId)) {
@@ -133,19 +160,26 @@ export const getCollection = asyncHandler(async (req, res) => {
     parentId = parentCollection._id;
   }
 
-  const collections = await CollectionModel.find({
-    organizationId: organization._id,
-    parentCollectionId: parentId,
-  }).sort({
-    createdAt: -1,
-  });
+  const collections = await CollectionModel.find(filter)
+  .sort({createdAt: -1,})
+  .skip(skip)
+  .limit(limit)
 
   res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        { collections },
+        { collections ,
+          meta:{
+            page,
+            limit,
+            totalItems,
+            totalPages,
+            hasPreviousPage,
+            hasNextPage
+          }
+         },
         "Collections fetched successfully",
       ),
     );
