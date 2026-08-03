@@ -4,7 +4,7 @@ import { toast } from '@/hooks/use-toast'
 import { Toaster } from './toaster'
 
 type AppToastOptions = {
-  title: string
+  title?: string
   description?: string
 }
 

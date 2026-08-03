@@ -42,7 +42,7 @@ export default function DashboardSidebar({ className = '', ownerName , organizat
 
   return (
     <aside
-      className={`flex min-h-dvh w-[292px] shrink-0 flex-col border-r border-[#F0DDD8] px-6 py-7 sm:px-8 sm:py-9 ${className}`}
+      className={`flex h-dvh w-[292px] shrink-0 flex-col overflow-hidden border-r border-[#F0DDD8] bg-[#FFF7F4] px-6 py-7 sm:px-8 sm:py-9 ${className}`}
     >
       <Link href="/dashboard" onClick={onNavigate} className="flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FFD4CE] text-white shadow-sm">
@@ -56,7 +56,7 @@ export default function DashboardSidebar({ className = '', ownerName , organizat
         </div>
       </Link>
 
-      <nav className="mt-10 space-y-2 sm:mt-14">
+      <nav className="mt-10 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 sm:mt-14">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
           const isActive =
@@ -87,7 +87,7 @@ export default function DashboardSidebar({ className = '', ownerName , organizat
         })}
       </nav>
 
-      <div className="mt-auto rounded-[24px] bg-white/58 p-4 shadow-[0_16px_48px_rgba(183,110,121,0.06)] ring-1 ring-[#F2DEDA] backdrop-blur-sm">
+      <div className="mt-6 rounded-[24px] bg-white/58 p-4 shadow-[0_16px_48px_rgba(183,110,121,0.06)] ring-1 ring-[#F2DEDA] backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFD4CE] text-sm font-semibold text-white">
             AR
