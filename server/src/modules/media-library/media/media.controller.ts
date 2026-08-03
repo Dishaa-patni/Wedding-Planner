@@ -4,9 +4,11 @@ import { ApiError } from "../../../utils/api-error.js";
 import { ApiResponse } from "../../../utils/api-response.js";
 import { asyncHandler } from "../../../utils/async-handler.js";
 import { uploadBufferToCloudinary } from "../../../utils/upload-to-cloudinary.js";
-import { getUserOrganization, requireUploadedFile, validateCollectionInOrganization } from "../media-library.helpers.js";
+
 import { MediaModel } from "./media.model.js";
 import cloudinary from "../../../config/cloudinary.js";
+import { getUserOrganization } from "../../../utils/helper.js";
+import { requireUploadedFile, validateCollectionInOrganization } from "../media-library.helpers.js";
 
 
 // 1) receive the request -> collectionID
@@ -96,21 +98,46 @@ export const getMedia = asyncHandler(async(req , res)=>{
         organization._id
     )
 
+    const page = Number(req.query.page)
+    const limit = Number(req.query.limit)
+
+    if (!Number.isInteger(page) || page < 1) {
+  throw new ApiError(400, 'Page must be a positive number')
+}
+
+if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+  throw new ApiError(400, 'Limit must be between 1 and 50')
+}
+
+const filter = {
+  organizationId: organization._id,
+  ...(collection ? { collectionId: collection._id } : {}),
+}
+
+const totalItems = await MediaModel.countDocuments(filter)
+const totalPages = Math.ceil(totalItems / limit)
+const skip = (page - 1) * limit
     // if we get collection id then get the id from teh actual collection dont depend on collectionId from params 
 
-    const targetCollectionId = collection?._id ?? null
-
-    const media = await MediaModel.find({
-        organizationId: organization._id,
-        collectionId: targetCollectionId
-    }).populate('uploadedBy', 'fullName email').sort({
-        createdAt: -1
-    })
+    const media = await MediaModel.find(filter)
+  .populate('uploadedBy', 'fullName email')
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(limit)
 
     res.status(200).json(
         new ApiResponse(
             200,
-            {media},
+            {media ,
+                meta:{
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasPreviousPage: page > 1,
+        hasNextPage: page < totalPages,
+                }
+            },
             'Media Fetched Successfully'
         )
     )

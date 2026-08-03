@@ -7,6 +7,8 @@ import { ApiResponse } from './utils/api-response.js'
 import { organizationRoutes } from './modules/organizations/organization.routes.js'
 import { mediaCollectionRoute} from './modules/media-library/collections/collection.routes.js'
 import { mediaRoute } from './modules/media-library/media/media.routes.js'
+import { weddingWorkspaceRoute } from './modules/wedding-workspace/wedding-workspace.routes.js'
+import { moodboardRoute } from './modules/wedding-workspace/moodboards/moodboard.routes.js'
 
 
 const app = express()
@@ -29,6 +31,8 @@ app.use('/api/auth', authRoutes)
 app.use('/api/organizations', organizationRoutes)
 app.use('/api/v1/media-library', mediaCollectionRoute)
 app.use('/api/v1/media-library', mediaRoute)
+app.use('/api/v1/wedding-workspaces', weddingWorkspaceRoute)
+app.use('/api/v1/wedding-workspaces' , moodboardRoute)
 
 
 app.use((_req, _res, next) => {
