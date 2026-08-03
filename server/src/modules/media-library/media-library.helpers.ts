@@ -1,24 +1,6 @@
 import { Types } from "mongoose"
 import { ApiError } from "../../utils/api-error.js"
-import { OrganizationModel } from "../organizations/organization.model.js"
 import { CollectionModel } from "./collections/collection.model.js"
-
-
-export const getUserOrganization = async(userId? : string)=>{
-if(!userId){
-    throw new ApiError(401 , "Unauthorized")
-}
-
-const organization = await OrganizationModel.findOne({
-    ownerId: userId
-})
-
-if(!organization){
-    throw new ApiError(404 , "Organization not found")
-}
-
-return organization
-}
 
 export const validateCollectionInOrganization = async(
     collectionId: unknown,

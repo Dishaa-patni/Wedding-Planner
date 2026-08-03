@@ -4,9 +4,11 @@ import { ApiError } from "../../../utils/api-error.js";
 import { ApiResponse } from "../../../utils/api-response.js";
 import { asyncHandler } from "../../../utils/async-handler.js";
 import { uploadBufferToCloudinary } from "../../../utils/upload-to-cloudinary.js";
-import { getUserOrganization, requireUploadedFile, validateCollectionInOrganization } from "../media-library.helpers.js";
+
 import { MediaModel } from "./media.model.js";
 import cloudinary from "../../../config/cloudinary.js";
+import { getUserOrganization } from "../../../utils/helper.js";
+import { requireUploadedFile, validateCollectionInOrganization } from "../media-library.helpers.js";
 
 
 // 1) receive the request -> collectionID
