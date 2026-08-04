@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import {
   CollectionDetailScreenSkeleton,
   CompactCollectionCardsSkeleton,
+  MediaCardsSkeleton,
 } from './components/MediaLibrarySkeletons'
 import { NewCollectionModal } from './components/NewCollectionModal'
 import { UploadMediaModal } from './components/UploadMediaModal'
@@ -30,7 +31,10 @@ import {
   useCollectionById,
   useCollections,
   useCreateCollection,
+  useMedia,
+  useUploadMedia,
 } from './hooks/use-media-library'
+import type { MediaLibraryItem } from './media-library.types'
 
 type CollectionDetailScreenProps = {
   collectionId: string
@@ -41,58 +45,6 @@ const subCollectionColors = [
   'bg-[#EAF6EC] text-[#699E73]',
   'bg-[#FFF0E4] text-[#D9924A]',
   'bg-[#E7F3FB] text-[#5F9DCC]',
-]
-
-const dummyMediaItems = [
-  {
-    id: 'theme-pastel-mandap',
-    title: 'Pastel mandap',
-    collection: 'Rental',
-    updatedAt: 'now',
-    type: 'JPG',
-    url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'garden-lounge',
-    title: 'Garden lounge setup',
-    collection: 'Rental',
-    updatedAt: 'now',
-    type: 'JPG',
-    url: 'https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'mandap-closeup',
-    title: 'Mandap closeup',
-    collection: 'Rental',
-    updatedAt: 'now',
-    type: 'JPG',
-    url: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'walkway-ideas',
-    title: 'Walkway ideas',
-    collection: 'Rental',
-    updatedAt: 'now',
-    type: 'MP4',
-    duration: '00:21',
-    url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'stage-backdrop',
-    title: 'Stage backdrop',
-    collection: 'Rental',
-    updatedAt: 'now',
-    type: 'JPG',
-    url: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 'hanging-florals',
-    title: 'Hanging florals',
-    collection: 'Rental',
-    updatedAt: '1h',
-    type: 'JPG',
-    url: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=900&q=80',
-  },
 ]
 
 function FolderGlyph({ className }: { className: string }) {
@@ -106,20 +58,76 @@ function FolderGlyph({ className }: { className: string }) {
   )
 }
 
+const getMediaLabel = (mediaItem: MediaLibraryItem) => {
+  const extension = mediaItem.originalName.split('.').pop()
+
+  if (extension) return extension.toUpperCase()
+
+  return mediaItem.type === 'video' ? 'MP4' : 'JPG'
+}
+
+const formatRelativeDate = (dateValue: string) => {
+  const updatedAt = new Date(dateValue).getTime()
+
+  if (Number.isNaN(updatedAt)) return 'recently'
+
+  const elapsedMs = Date.now() - updatedAt
+  const elapsedMinutes = Math.max(0, Math.floor(elapsedMs / 60000))
+
+  if (elapsedMinutes < 1) return 'now'
+  if (elapsedMinutes < 60) return `${elapsedMinutes}m ago`
+
+  const elapsedHours = Math.floor(elapsedMinutes / 60)
+  if (elapsedHours < 24) return `${elapsedHours}h ago`
+
+  const elapsedDays = Math.floor(elapsedHours / 24)
+  if (elapsedDays === 1) return 'yesterday'
+  if (elapsedDays < 7) return `${elapsedDays} days ago`
+
+  const elapsedWeeks = Math.floor(elapsedDays / 7)
+  return elapsedWeeks === 1 ? '1 week ago' : `${elapsedWeeks} weeks ago`
+}
+
+const getPaginationItems = (currentPage: number, totalPages: number) => {
+  if (totalPages <= 5) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1)
+  }
+
+  const pages = new Set([1, currentPage - 1, currentPage, currentPage + 1, totalPages])
+  const sortedPages = Array.from(pages)
+    .filter((page) => page >= 1 && page <= totalPages)
+    .sort((firstPage, secondPage) => firstPage - secondPage)
+
+  return sortedPages.flatMap((page, index) => {
+    const previousPage = sortedPages[index - 1]
+
+    if (previousPage && page - previousPage > 1) {
+      return [`gap-${previousPage}-${page}`, page]
+    }
+
+    return [page]
+  })
+}
+
 export default function CollectionDetailScreen({ collectionId }: CollectionDetailScreenProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent')
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false)
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
-  const [uploadedMediaCount, setUploadedMediaCount] = useState(0)
+  const [mediaPage, setMediaPage] = useState(1)
+  const mediaPerPage = 12
 
   const { data: collectionDetails, isLoading: isLoadingCollection } =
     useCollectionById(collectionId)
   const { data: subCollectionsData, isLoading: isLoadingSubCollections } =
     useCollections(collectionId)
+  const { data: mediaData, isLoading: isLoadingMedia } =
+    useMedia(collectionId, mediaPage, mediaPerPage)
   const { mutate: createCollection, isPending: isCreatingCollection } =
     useCreateCollection(collectionId)
+  const { mutateAsync: uploadMedia, isPending: isUploadingMedia } =
+    useUploadMedia(collectionId)
 
   const collection = collectionDetails?.collection
   const breadcrumbs = collectionDetails?.breadcrumbs ?? []
@@ -131,6 +139,14 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
         ? [{ id: collection._id, name: collection.name }]
         : []
   const collectionName = collection?.name ?? 'Collection'
+  const mediaItems = mediaData?.media ?? []
+  const mediaMeta = mediaData?.meta
+  const currentMediaPage = mediaMeta?.page ?? mediaPage
+  const mediaPageCount = Math.max(1, mediaMeta?.totalPages ?? 1)
+  const canGoToPreviousMedia = mediaMeta?.hasPreviousPage ?? false
+  const canGoToNextMedia = mediaMeta?.hasNextPage ?? false
+  const canShowMediaPagination = mediaPageCount > 1
+  const uploadCollections = collection ? [collection, ...subCollections] : subCollections
 
   const filteredSubCollections = subCollections
     .filter((subCollection) =>
@@ -147,14 +163,14 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
       )
     })
 
-  const filteredMediaItems = dummyMediaItems.filter((mediaItem) => {
+  const filteredMediaItems = mediaItems.filter((mediaItem) => {
     const query = searchQuery.trim().toLowerCase()
 
     if (!query) return true
 
     return (
-      mediaItem.title.toLowerCase().includes(query) ||
-      mediaItem.collection.toLowerCase().includes(query) ||
+      mediaItem.displayName.toLowerCase().includes(query) ||
+      mediaItem.originalName.toLowerCase().includes(query) ||
       mediaItem.type.toLowerCase().includes(query)
     )
   })
@@ -171,6 +187,24 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
         },
       },
     )
+  }
+
+  const handleUploadMedia = (files: File[], targetCollectionId: string | null) => {
+    Promise.all(files.map((file) => uploadMedia({ file, collectionId: targetCollectionId })))
+      .then(() => setIsUploadModalOpen(false))
+      .catch(() => {
+        // Toast handling lives in the upload mutation.
+      })
+  }
+
+  const goToPreviousMedia = () => {
+    if (!canGoToPreviousMedia) return
+    setMediaPage((currentPage) => currentPage - 1)
+  }
+
+  const goToNextMedia = () => {
+    if (!canGoToNextMedia) return
+    setMediaPage((currentPage) => currentPage + 1)
   }
 
   if (isLoadingCollection) {
@@ -271,7 +305,10 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
           <span className="sr-only">Search in {collectionName}</span>
           <input
             value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
+            onChange={(event) => {
+              setSearchQuery(event.target.value)
+              setMediaPage(1)
+            }}
             placeholder={`Search in ${collectionName}...`}
             className="min-w-0 flex-1 bg-transparent text-sm text-[#3B2928] outline-none placeholder:text-[#A0928F]"
           />
@@ -400,7 +437,10 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
       <div className="mt-10">
         <div className="flex items-center justify-between gap-4">
           <h2 className="font-sans text-xl font-semibold text-[#2E2E2E]">
-            Media in {collectionName} <span className="text-[#8A7B78]">({filteredMediaItems.length + uploadedMediaCount})</span>
+            Media in {collectionName}{' '}
+            <span className="text-[#8A7B78]">
+              ({mediaMeta?.totalItems ?? filteredMediaItems.length})
+            </span>
           </h2>
           <button
             type="button"
@@ -411,28 +451,33 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
           </button>
         </div>
 
-        <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
+        {isLoadingMedia ? (
+          <div className="mt-5">
+            <MediaCardsSkeleton count={mediaPerPage} />
+          </div>
+        ) : filteredMediaItems.length > 0 ? (
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
           {filteredMediaItems.map((mediaItem) => (
             <motion.article
-              key={mediaItem.id}
+              key={mediaItem._id}
               whileHover={{ y: -4 }}
               className="group overflow-hidden rounded-[18px] border border-[#F0DDD8] bg-white/90 shadow-[0_16px_44px_rgba(183,110,121,0.08)] transition"
             >
               <div className="relative aspect-[1.42] overflow-hidden bg-[#FFF0EE]">
                 <img
                   src={mediaItem.url}
-                  alt={mediaItem.title}
+                  alt={mediaItem.displayName}
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 />
 
                 <span className="absolute bottom-3 left-3 rounded-[10px] bg-white px-3 py-1.5 text-xs font-bold tracking-wide text-[#3B2928] shadow-[0_8px_20px_rgba(59,41,40,0.18)] ring-1 ring-white/70">
-                  {mediaItem.type}
+                  {getMediaLabel(mediaItem)}
                 </span>
 
-                {mediaItem.duration && (
+                {mediaItem.type === 'video' && (
                   <>
                     <span className="absolute right-3 top-3 rounded-full bg-[#2E2E2E]/82 px-2.5 py-1 text-xs font-semibold text-white">
-                      {mediaItem.duration}
+                      Video
                     </span>
                     <span className="absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#2E2E2E]/62 text-white backdrop-blur-sm">
                       <Play className="ml-0.5 h-5 w-5 fill-current" />
@@ -444,16 +489,17 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
               <div className="flex items-start justify-between gap-3 p-4">
                 <div className="min-w-0">
                   <h3 className="truncate text-sm font-semibold text-[#2E2E2E]">
-                    {mediaItem.title}
+                    {mediaItem.displayName}
                   </h3>
                   <p className="mt-2 truncate text-sm text-[#8A7B78]">
-                    {mediaItem.collection} <span className="px-1">.</span> {mediaItem.updatedAt}
+                    {collectionName} <span className="px-1">.</span>{' '}
+                    {formatRelativeDate(mediaItem.updatedAt)}
                   </p>
                 </div>
 
                 <button
                   type="button"
-                  aria-label={`Delete ${mediaItem.title}`}
+                  aria-label={`Delete ${mediaItem.displayName}`}
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#D77474] transition hover:bg-[#FFF0EE] hover:text-[#C64F55]"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -461,37 +507,52 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
               </div>
             </motion.article>
           ))}
-        </div>
+          </div>
+        ) : (
+          <div className="mt-5 rounded-[22px] border border-dashed border-[#F0DDD8] bg-white/60 px-6 py-10 text-center text-sm font-medium text-[#756967]">
+            No media found in this collection.
+          </div>
+        )}
 
-        <div className="mx-auto mt-10 flex w-fit items-center gap-2 rounded-[18px] border border-[#F0DDD8] bg-white/76 p-1 shadow-sm">
+        {canShowMediaPagination && (
+          <div className="mx-auto mt-10 flex w-fit items-center gap-2 rounded-[18px] border border-[#F0DDD8] bg-white/76 p-1 shadow-sm">
           <button
             type="button"
             aria-label="Previous page"
-            className="flex h-10 min-w-10 items-center justify-center rounded-[14px] text-[#756967] transition hover:bg-[#FFF7F4] hover:text-[#3B2928]"
+            disabled={!canGoToPreviousMedia}
+            onClick={goToPreviousMedia}
+            className="flex h-10 min-w-10 items-center justify-center rounded-[14px] text-[#756967] transition hover:bg-[#FFF7F4] hover:text-[#3B2928] disabled:pointer-events-none disabled:opacity-35"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          {['1', '2', '3', '...', '12'].map((page) => (
+          {getPaginationItems(currentMediaPage, mediaPageCount).map((page) => (
             <button
               key={page}
               type="button"
+              disabled={typeof page === 'string'}
+              onClick={() => {
+                if (typeof page === 'number') setMediaPage(page)
+              }}
               className={`flex h-10 min-w-10 items-center justify-center rounded-[14px] px-3 text-sm font-semibold ${
-                page === '1'
+                page === currentMediaPage
                   ? 'bg-[#FFF0EE] text-[#D77474]'
                   : 'text-[#756967] hover:bg-[#FFF7F4]'
               }`}
             >
-              {page}
+              {typeof page === 'number' ? page : '...'}
             </button>
           ))}
           <button
             type="button"
             aria-label="Next page"
-            className="flex h-10 min-w-10 items-center justify-center rounded-[14px] text-[#756967] transition hover:bg-[#FFF7F4] hover:text-[#3B2928]"
+            disabled={!canGoToNextMedia}
+            onClick={goToNextMedia}
+            className="flex h-10 min-w-10 items-center justify-center rounded-[14px] text-[#756967] transition hover:bg-[#FFF7F4] hover:text-[#3B2928] disabled:pointer-events-none disabled:opacity-35"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
+        )}
       </div>
 
       <NewCollectionModal
@@ -503,11 +564,11 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
       />
       <UploadMediaModal
         open={isUploadModalOpen}
-        collections={subCollections}
+        collections={uploadCollections}
+        defaultCollectionId={collectionId}
         onClose={() => setIsUploadModalOpen(false)}
-        onUploadComplete={(fileCount) =>
-          setUploadedMediaCount((currentCount) => currentCount + fileCount)
-        }
+        onUploadComplete={handleUploadMedia}
+        isUploading={isUploadingMedia}
         onRequestCollection={() => {
           setIsUploadModalOpen(false)
           window.setTimeout(() => setIsCollectionModalOpen(true), 80)

@@ -5,6 +5,11 @@ import { CreateCollectionRequest } from "../media-library.types"
 import { mediaLibraryApi } from "../media-library.api"
 import { appToast } from "@/components/ui/app-toaster"
 
+type UploadMediaVariables = {
+  file: File
+  collectionId?: string | null
+}
+
 
 // CReate a custom hook 
 //return useMutation -> inside that add mutationFn 
@@ -22,6 +27,14 @@ export const mediaLibraryQueryKeys = {
   ['media-library', 'collections', parentCollectionId ?? 'root', page, limit] as const,
     collection: (collectionId: string) =>
         ['media-library', 'collection', collectionId] as const,
+    mediaPages: (collectionId?: string | null) =>
+        ['media-library', 'media', collectionId ?? 'root'] as const,
+    media: (
+      collectionId?: string | null,
+      page = 1,
+      limit = 10,
+    ) =>
+      ['media-library', 'media', collectionId ?? 'root', page, limit] as const,
 }
 
 export const useCollections = (
@@ -47,6 +60,23 @@ export const useCollectionById = (collectionId: string) => {
         queryFn: () => mediaLibraryApi.getCollectionById(collectionId),
         select: (response) => response.data,
     })
+}
+
+export const useMedia = (
+  collectionId?: string | null,
+  page = 1,
+  limit = 10,
+) => {
+  return useQuery({
+    queryKey: mediaLibraryQueryKeys.media(collectionId, page, limit),
+    queryFn: () =>
+      mediaLibraryApi.getMedia({
+        collectionId: collectionId ?? null,
+        page,
+        limit,
+      }),
+    select: (response) => response.data,
+  })
 }
 
 export const useCreateCollection =(parentCollectionId?: string | null)=>{
@@ -131,4 +161,39 @@ export const useDeleteCollection = (parentCollectionId?: string | null) => {
          })
         }
     })
+}
+
+export const useUploadMedia = (collectionId?: string | null) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: UploadMediaVariables) => mediaLibraryApi.uploadMedia(payload),
+
+    onSuccess: (response) => {
+      const uploadedCollectionId =
+        typeof response.data.media.collectionId === 'object'
+          ? response.data.media.collectionId?._id
+          : response.data.media.collectionId
+
+      queryClient.invalidateQueries({
+        queryKey: mediaLibraryQueryKeys.mediaPages(collectionId),
+      })
+
+      if (uploadedCollectionId !== (collectionId ?? null)) {
+        queryClient.invalidateQueries({
+          queryKey: mediaLibraryQueryKeys.mediaPages(uploadedCollectionId),
+        })
+      }
+
+      appToast.success({
+        description: response.message,
+      })
+    },
+
+    onError: (error: Error) => {
+      appToast.error({
+        description: error.message,
+      })
+    },
+  })
 }
