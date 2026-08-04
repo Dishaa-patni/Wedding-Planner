@@ -62,7 +62,10 @@ const media = await MediaModel.create({
   cloudinaryResourceType: cloudinaryResult.resource_type,
 })
 
-const populatedMedia = await media.populate('uploadedBy', 'fullName email')
+const populatedMedia = await media.populate([
+  { path: 'uploadedBy', select: 'fullName email' },
+  { path: 'collectionId', select: 'name' },
+])
 
 res.status(201).json(
     new ApiResponse(
@@ -98,8 +101,8 @@ export const getMedia = asyncHandler(async(req , res)=>{
         organization._id
     )
 
-    const page = Number(req.query.page)
-    const limit = Number(req.query.limit)
+    const page = Number(req.query?.page ?? 1)
+    const limit = Number(req.query?.limit ?? 20)
 
     if (!Number.isInteger(page) || page < 1) {
   throw new ApiError(400, 'Page must be a positive number')
@@ -121,6 +124,7 @@ const skip = (page - 1) * limit
 
     const media = await MediaModel.find(filter)
   .populate('uploadedBy', 'fullName email')
+  .populate('collectionId', 'name')
   .sort({ createdAt: -1 })
   .skip(skip)
   .limit(limit)
@@ -164,7 +168,9 @@ export const getMediaById = asyncHandler(async(req , res)=>{
     const media = await MediaModel.findOne({
         _id: mediaId,
         organizationId: organization._id
-    }).populate('uploadedBy', 'fullName email')
+    })
+      .populate('uploadedBy', 'fullName email')
+      .populate('collectionId', 'name')
 
     if(!media){
         throw new ApiError(404 , 'Media not Found')
@@ -238,7 +244,10 @@ export const updateMedia = asyncHandler(async(req , res)=>{
 
   await media.save()
 
-  const populatedMedia = await media.populate('uploadedBy', 'fullName email')
+  const populatedMedia = await media.populate([
+    { path: 'uploadedBy', select: 'fullName email' },
+    { path: 'collectionId', select: 'name' },
+  ])
 
   res.status(200).json(
     new ApiResponse(
