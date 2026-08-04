@@ -5,8 +5,10 @@ import type {
   DeleteCollectionResponse,
   GetCollectionByIdResponse,
   GetCollectionsResponse,
+  GetMediaResponse,
   RenameCollectionRequest,
   RenameCollectionResponse,
+  UploadMediaResponse,
 } from "./media-library.types";
 
 type GetCollectionsParams = {
@@ -15,6 +17,16 @@ type GetCollectionsParams = {
   limit?: number
 }
 
+type GetMediaParams = {
+  collectionId?: string | null
+  page?: number
+  limit?: number
+}
+
+type UploadMediaPayload = {
+  file: File
+  collectionId?: string | null
+}
 
 const createCollection = (
   payload: CreateCollectionRequest,
@@ -52,10 +64,35 @@ const deleteCollection = (collectionId: string) =>
     `/api/v1/media-library/collections/${collectionId}`,
   )
 
+const getMedia = ({ collectionId = null, page = 1, limit = 20 }: GetMediaParams) =>
+  apiClient.get<GetMediaResponse>('/api/v1/media-library/media', {
+    params: {
+      ...(collectionId ? { collectionId } : {}),
+      page,
+      limit,
+    },
+  })
+
+const uploadMedia = ({ file, collectionId = null }: UploadMediaPayload) => {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  if (collectionId) {
+    formData.append('collectionId', collectionId)
+  }
+
+  return apiClient.post<UploadMediaResponse, FormData>(
+    '/api/v1/media-library/media',
+    formData,
+  )
+}
+
 export const mediaLibraryApi = {
   createCollection,
   getCollections,
   getCollectionById,
   updateCollection,
   deleteCollection,
+  getMedia,
+  uploadMedia,
 }

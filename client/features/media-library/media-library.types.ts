@@ -81,3 +81,50 @@ export type DeleteCollectionResponse = {
     deletedCollectionIds: string[]
   }
 }
+
+export type UploadedBy = {
+  _id: string
+  fullName: string
+  email: string
+}
+
+export type MediaCollectionReference = {
+  _id: string
+  name: string
+}
+
+export type MediaLibraryItem = {
+  _id: string
+  organizationId: string
+  collectionId: string | MediaCollectionReference | null
+  url: string
+  cloudinaryPublicId: string
+  cloudinaryResourceType: string
+  type: 'image' | 'video'
+  size: number
+  mimeType: string
+  uploadedBy: string | UploadedBy
+  originalName: string
+  displayName: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type UploadMediaResponse = {
+  success: boolean
+  statusCode: number
+  message: string
+  data: {
+    media: MediaLibraryItem
+  }
+}
+
+export type GetMediaResponse = {
+  success: boolean
+  statusCode: number
+  message: string
+  data: {
+    media: MediaLibraryItem[]
+    meta: Pagination
+  }
+}
