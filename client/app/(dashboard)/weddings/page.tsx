@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
+import { WeddingWorkspaceScreen } from '@/features/wedding-workspace'
 
-export const metadata: Metadata = { title: 'Weddings — Vivaha' }
+export const metadata: Metadata = { title: 'Wedding Workspace - Vivaha' }
 
 export default function WeddingsPage() {
-  return <section>Weddings</section>
+  return <WeddingWorkspaceScreen />
 }

@@ -17,10 +17,10 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-[#FFF7F4] text-[#3B2928]">
-      <DashboardSidebar className="fixed inset-y-0 left-0 z-30 hidden lg:flex"   ownerName={ownerName}
+      <DashboardSidebar className="dashboard-shell-sidebar fixed inset-y-0 left-0 z-30 hidden lg:flex"   ownerName={ownerName}
   organizationName={organizationName} />
 
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#F0DDD8] bg-[#FFF7F4]/92 px-4 backdrop-blur-xl sm:px-6 lg:hidden">
+      <header className="dashboard-mobile-header sticky top-0 z-40 flex h-16 items-center justify-between border-b border-[#F0DDD8] bg-[#FFF7F4]/92 px-4 backdrop-blur-xl sm:px-6 lg:hidden">
         <button
           type="button"
           onClick={() => setIsSidebarOpen(true)}
@@ -75,7 +75,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <main className="min-h-dvh min-w-0 px-4 py-6 sm:px-6 md:px-8 lg:ml-[292px] lg:px-8 lg:py-8 xl:px-10">
+      <main className="dashboard-shell-main min-h-dvh min-w-0 px-4 py-6 sm:px-6 md:px-8 lg:ml-[292px] lg:px-8 lg:py-8 xl:px-10">
         {children}
       </main>
     </div>
