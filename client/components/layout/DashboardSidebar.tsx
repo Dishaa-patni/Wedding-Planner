@@ -27,7 +27,7 @@ interface DashboardSidebarProps {
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Weddings', href: '/weddings', icon: Gem },
+  { label: 'Wedding Workspace', href: '/weddings', icon: Gem },
   { label: 'Team', href: '/team', icon: Users },
   { label: 'Vendors', href: '/vendors', icon: Package },
   { label: 'Media Library', href: '/media-library', icon: Image },
@@ -69,7 +69,7 @@ export default function DashboardSidebar({ className = '', ownerName , organizat
               key={item.label}
               href={item.href}
               onClick={onNavigate}
-              className={`group flex h-12 items-center gap-4 rounded-2xl px-4 text-[15px] font-medium transition-all ${
+              className={`group flex h-12 items-center gap-3 rounded-2xl px-4 text-[14px] font-medium transition-all ${
                 isActive
                   ? 'bg-[#FFF0EE] text-[#3B2928]'
                   : 'text-[#756967] hover:bg-[#FFF0EE] hover:text-[#3B2928]'
@@ -80,7 +80,7 @@ export default function DashboardSidebar({ className = '', ownerName , organizat
                   isActive ? 'text-[#D77474]' : 'text-[#756967] group-hover:text-[#D77474]'
                 }`}
               />
-              <span className="flex-1">{item.label}</span>
+              <span className="min-w-0 flex-1 whitespace-nowrap">{item.label}</span>
               {isActive && <span className="h-2 w-2 rounded-full bg-[#D77474]" />}
             </Link>
           )
