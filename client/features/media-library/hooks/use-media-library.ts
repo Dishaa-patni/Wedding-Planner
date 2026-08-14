@@ -10,6 +10,14 @@ type UploadMediaVariables = {
   collectionId?: string | null
 }
 
+type AddMoodboardItemVariables = {
+  weddingId: string
+  weddingWorkspaceName?: string
+  mediaId: string
+  note?: string
+  sectionId?: string
+}
+
 
 // CReate a custom hook 
 //return useMutation -> inside that add mutationFn 
@@ -187,6 +195,64 @@ export const useUploadMedia = (collectionId?: string | null) => {
 
       appToast.success({
         description: response.message,
+      })
+    },
+
+    onError: (error: Error) => {
+      appToast.error({
+        description: error.message,
+      })
+    },
+  })
+}
+
+export const useDeleteMedia = (collectionId?: string | null) => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (mediaId: string) => mediaLibraryApi.deleteMedia(mediaId),
+
+    onSuccess: (response) => {
+      const deletedCollectionId =
+        typeof response.data.media.collectionId === 'object'
+          ? response.data.media.collectionId?._id
+          : response.data.media.collectionId
+
+      queryClient.invalidateQueries({
+        queryKey: mediaLibraryQueryKeys.mediaPages(collectionId),
+      })
+
+      if (deletedCollectionId !== (collectionId ?? null)) {
+        queryClient.invalidateQueries({
+          queryKey: mediaLibraryQueryKeys.mediaPages(deletedCollectionId),
+        })
+      }
+
+      appToast.success({
+        description: response.message,
+      })
+    },
+
+    onError: (error: Error) => {
+      appToast.error({
+        description: error.message,
+      })
+    },
+  })
+}
+
+export const useAddMoodboardItem = () => {
+  return useMutation({
+    mutationFn: (payload: AddMoodboardItemVariables) =>
+      mediaLibraryApi.addMoodboardItem(payload),
+
+    onSuccess: (response, variables) => {
+      const weddingWorkspaceName = variables.weddingWorkspaceName?.trim()
+
+      appToast.success({
+        description: weddingWorkspaceName
+          ? `Added to ${weddingWorkspaceName} moodboard.`
+          : response.message,
       })
     },
 

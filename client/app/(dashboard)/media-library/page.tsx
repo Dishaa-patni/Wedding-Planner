@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { MediaLibraryScreen } from '@/features/media-library'
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function MediaLibraryPage() {
-  return <MediaLibraryScreen />
+  return (
+    <Suspense fallback={null}>
+      <MediaLibraryScreen />
+    </Suspense>
+  )
 }

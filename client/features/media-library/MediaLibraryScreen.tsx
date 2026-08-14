@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { Variants } from 'framer-motion'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowUpDown,
   ChevronDown,
@@ -25,16 +25,21 @@ import {
   Video,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { appToast } from '@/components/ui/app-toaster'
+import { useWeddingWorkspace } from '@/features/wedding-workspace/use-wedding-workspace'
 import type { Collection, MediaLibraryItem } from './media-library.types'
 import { DeleteCollectionModal } from './components/DeleteCollectionModal'
 import { MediaCardsSkeleton, MediaLibraryScreenSkeleton } from './components/MediaLibrarySkeletons'
+import { MediaPresentationModal } from './components/MediaPresentationModal'
 import { NewCollectionModal } from './components/NewCollectionModal'
 import { RenameCollectionModal } from './components/RenameCollectionModal'
 import { UploadMediaModal } from './components/UploadMediaModal'
 import {
+  useAddMoodboardItem,
   useCollections,
   useCreateCollection,
   useDeleteCollection,
+  useDeleteMedia,
   useMedia,
   useUpdateCollection,
   useUploadMedia,
@@ -160,6 +165,9 @@ const collectionRowVariants: Variants = {
 export default function MediaLibraryScreen({ parentCollectionId }: MediaLibraryScreenProps) {
   const currentParentCollectionId = parentCollectionId ?? null
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const activeWeddingId = searchParams.get('weddingId')
+  const { data: activeWeddingWorkspace } = useWeddingWorkspace(activeWeddingId ?? '')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent')
 
@@ -171,6 +179,10 @@ export default function MediaLibraryScreen({ parentCollectionId }: MediaLibraryS
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const [collectionPage, setCollectionPage] = useState(1)
   const [mediaPage, setMediaPage] = useState(1)
+  const [selectedMediaId, setSelectedMediaId] = useState<string | null>(null)
+  const [pendingPresentationDirection, setPendingPresentationDirection] = useState<
+    'previous' | 'next' | null
+  >(null)
   const collectionsPerPage = 4
   const mediaPerPage = 10
 
@@ -188,6 +200,9 @@ export default function MediaLibraryScreen({ parentCollectionId }: MediaLibraryS
     useUpdateCollection(currentParentCollectionId)
   const { mutate: deleteCollection, isPending: isDeletingCollection } =
     useDeleteCollection(currentParentCollectionId)
+  const { mutate: deleteMedia, isPending: isDeletingMedia } =
+    useDeleteMedia(currentParentCollectionId)
+  const { mutate: addMoodboardItem, isPending: isAddingToMoodboard } = useAddMoodboardItem()
 
   const displayCollections = collectionsData?.collections ?? []
   const collectionMeta = collectionsData?.meta
@@ -236,6 +251,17 @@ export default function MediaLibraryScreen({ parentCollectionId }: MediaLibraryS
   const canShowMediaPagination = mediaPageCount > 1
 
   const deleteTargetMeta = deleteTarget ? getCollectionMeta(deleteTarget.collectionIndex) : null
+  const selectedMediaIndex = filteredMediaItems.findIndex(
+    (mediaItem) => mediaItem._id === selectedMediaId,
+  )
+  const selectedMedia = selectedMediaIndex >= 0 ? filteredMediaItems[selectedMediaIndex] : null
+  const presentationIndex =
+    selectedMediaIndex >= 0 ? (currentMediaPage - 1) * mediaPerPage + selectedMediaIndex + 1 : 0
+  const presentationTotalItems = mediaMeta?.totalItems ?? filteredMediaItems.length
+  const canGoToPreviousPresentation = selectedMediaIndex > 0 || canGoToPreviousMedia
+  const canGoToNextPresentation =
+    selectedMediaIndex >= 0 &&
+    (selectedMediaIndex < filteredMediaItems.length - 1 || canGoToNextMedia)
 
   const handleCreateCollection = (name: string) => {
     createCollection(
@@ -273,12 +299,65 @@ const goToNextCollections = () => {
     setMediaPage((currentPage) => currentPage + 1)
   }
 
+  const goToPreviousPresentation = () => {
+    if (!selectedMedia) return
+
+    if (selectedMediaIndex > 0) {
+      setSelectedMediaId(filteredMediaItems[selectedMediaIndex - 1]._id)
+      return
+    }
+
+    if (canGoToPreviousMedia) {
+      setPendingPresentationDirection('previous')
+      setMediaPage((currentPage) => currentPage - 1)
+    }
+  }
+
+  const goToNextPresentation = () => {
+    if (!selectedMedia) return
+
+    if (selectedMediaIndex < filteredMediaItems.length - 1) {
+      setSelectedMediaId(filteredMediaItems[selectedMediaIndex + 1]._id)
+      return
+    }
+
+    if (canGoToNextMedia) {
+      setPendingPresentationDirection('next')
+      setMediaPage((currentPage) => currentPage + 1)
+    }
+  }
+
   const handleUploadMedia = (files: File[], collectionId: string | null) => {
     Promise.all(files.map((file) => uploadMedia({ file, collectionId })))
       .then(() => setIsUploadModalOpen(false))
       .catch(() => {
         // Toast handling lives in the upload mutation.
       })
+  }
+
+  const handleAddMediaToMoodboard = (note: string) => {
+    if (!selectedMedia) return
+
+    if (!activeWeddingId) {
+      appToast.error({
+        description: 'Open the media library from a wedding moodboard first.',
+      })
+      return
+    }
+
+    addMoodboardItem(
+      {
+        weddingId: activeWeddingId,
+        weddingWorkspaceName: activeWeddingWorkspace?.name,
+        mediaId: selectedMedia._id,
+        note: note.trim() || undefined,
+      },
+      {
+        onSuccess: () => {
+          setSelectedMediaId(null)
+        },
+      },
+    )
   }
 
   const handleRenameCollection = (name: string) => {
@@ -306,6 +385,16 @@ const goToNextCollections = () => {
     })
   }
 
+  const handleDeleteMedia = (mediaId: string) => {
+    deleteMedia(mediaId, {
+      onSuccess: () => {
+        if (selectedMediaId === mediaId) {
+          setSelectedMediaId(null)
+        }
+      },
+    })
+  }
+
   useEffect(() => {
     if (!openCollectionMenuId) return
 
@@ -328,6 +417,18 @@ const goToNextCollections = () => {
   useEffect(() => {
     setCollectionPage(1)
   }, [searchQuery, sortBy])
+
+  useEffect(() => {
+    if (!pendingPresentationDirection || filteredMediaItems.length === 0) return
+
+    const nextMedia =
+      pendingPresentationDirection === 'next'
+        ? filteredMediaItems[0]
+        : filteredMediaItems[filteredMediaItems.length - 1]
+
+    setSelectedMediaId(nextMedia._id)
+    setPendingPresentationDirection(null)
+  }, [filteredMediaItems, pendingPresentationDirection])
 
   return (
     <section className="mx-auto min-h-[calc(100dvh-72px)] w-full max-w-[1540px]">
@@ -733,8 +834,17 @@ const goToNextCollections = () => {
                 {filteredMediaItems.map((mediaItem) => (
                   <motion.article
                     key={mediaItem._id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedMediaId(mediaItem._id)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        setSelectedMediaId(mediaItem._id)
+                      }
+                    }}
                     whileHover={{ y: -4 }}
-                    className="group overflow-hidden rounded-[18px] border border-[#F0DDD8] bg-white/90 shadow-[0_16px_44px_rgba(183,110,121,0.08)] transition"
+                    className="group cursor-pointer overflow-hidden rounded-[18px] border border-[#F0DDD8] bg-white/90 shadow-[0_16px_44px_rgba(183,110,121,0.08)] outline-none transition focus-visible:ring-4 focus-visible:ring-[#FFD4CE]/40"
                   >
                     <div className="relative aspect-[1.5] overflow-hidden bg-[#FFF0EE]">
                       <img
@@ -773,10 +883,15 @@ const goToNextCollections = () => {
 
                       <button
                         type="button"
-                        aria-label={`Media actions for ${mediaItem.displayName}`}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#756967] transition hover:bg-[#FFF0EE] hover:text-[#3B2928]"
+                        aria-label={`Delete ${mediaItem.displayName}`}
+                        disabled={isDeletingMedia}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          handleDeleteMedia(mediaItem._id)
+                        }}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#D77474] transition hover:bg-[#FFF0EE] hover:text-[#C64F55] disabled:pointer-events-none disabled:opacity-50"
                       >
-                        <MoreVertical className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </motion.article>
@@ -866,6 +981,19 @@ const goToNextCollections = () => {
           setIsUploadModalOpen(false)
           window.setTimeout(() => setIsCollectionModalOpen(true), 80)
         }}
+      />
+      <MediaPresentationModal
+        open={Boolean(selectedMedia)}
+        media={selectedMedia}
+        currentIndex={presentationIndex}
+        totalItems={presentationTotalItems}
+        canGoPrevious={canGoToPreviousPresentation}
+        canGoNext={canGoToNextPresentation}
+        isAddingToMoodboard={isAddingToMoodboard}
+        onClose={() => setSelectedMediaId(null)}
+        onPrevious={goToPreviousPresentation}
+        onNext={goToNextPresentation}
+        onAddToMoodboard={handleAddMediaToMoodboard}
       />
     </section>
   )

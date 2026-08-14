@@ -119,6 +119,15 @@ export type UploadMediaResponse = {
   }
 }
 
+export type DeleteMediaResponse = {
+  success: boolean
+  statusCode: number
+  message: string
+  data: {
+    media: MediaLibraryItem
+  }
+}
+
 export type GetMediaResponse = {
   success: boolean
   statusCode: number
@@ -126,5 +135,40 @@ export type GetMediaResponse = {
   data: {
     media: MediaLibraryItem[]
     meta: Pagination
+  }
+}
+
+export type AddMoodboardItemRequest = {
+  mediaId: string
+  note?: string
+  sectionId?: string
+}
+
+export type MoodboardSectionReference = {
+  _id: string
+  name: string
+  isDefault: boolean
+  position: number
+}
+
+export type MoodboardItem = {
+  _id: string
+  organizationId: string
+  weddingWorkspaceId: string
+  sectionId: string | MoodboardSectionReference
+  mediaId: string | MediaLibraryItem
+  note: string
+  addedBy: string | UploadedBy
+  position: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type AddMoodboardItemResponse = {
+  success: boolean
+  statusCode: number
+  message: string
+  data: {
+    moodboardItem: MoodboardItem
   }
 }

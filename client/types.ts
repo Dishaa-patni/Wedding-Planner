@@ -42,7 +42,6 @@ export interface HeroCopy {
 
 export interface SiteConfig {
   name: string
-  tagline: string
   description: string
   city: string
   legalName: string

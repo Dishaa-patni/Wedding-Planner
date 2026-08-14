@@ -31,6 +31,7 @@ import {
   useCollectionById,
   useCollections,
   useCreateCollection,
+  useDeleteMedia,
   useMedia,
   useUploadMedia,
 } from './hooks/use-media-library'
@@ -128,6 +129,7 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
     useCreateCollection(collectionId)
   const { mutateAsync: uploadMedia, isPending: isUploadingMedia } =
     useUploadMedia(collectionId)
+  const { mutate: deleteMedia, isPending: isDeletingMedia } = useDeleteMedia(collectionId)
 
   const collection = collectionDetails?.collection
   const breadcrumbs = collectionDetails?.breadcrumbs ?? []
@@ -195,6 +197,10 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
       .catch(() => {
         // Toast handling lives in the upload mutation.
       })
+  }
+
+  const handleDeleteMedia = (mediaId: string) => {
+    deleteMedia(mediaId)
   }
 
   const goToPreviousMedia = () => {
@@ -500,7 +506,9 @@ export default function CollectionDetailScreen({ collectionId }: CollectionDetai
                 <button
                   type="button"
                   aria-label={`Delete ${mediaItem.displayName}`}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#D77474] transition hover:bg-[#FFF0EE] hover:text-[#C64F55]"
+                  disabled={isDeletingMedia}
+                  onClick={() => handleDeleteMedia(mediaItem._id)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#D77474] transition hover:bg-[#FFF0EE] hover:text-[#C64F55] disabled:pointer-events-none disabled:opacity-50"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

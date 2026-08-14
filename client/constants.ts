@@ -37,8 +37,7 @@ export const USER_ROLES = {
 } as const
 
 export const SITE: SiteConfig = {
-  name: 'Vivaha',
-  tagline: 'Wedding OS',
+  name: 'Evanto',
   description:
     'The premium SaaS platform for wedding planning companies. Manage every wedding, team, task and payment in one elegant place.',
   city: 'Mumbai',
