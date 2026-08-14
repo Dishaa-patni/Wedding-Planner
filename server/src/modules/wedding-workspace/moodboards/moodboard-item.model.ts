@@ -64,4 +64,23 @@ const moodboardItemSchema = new Schema<MoodboardItem>(
     }
 )
 
+moodboardItemSchema.index(
+  {
+    organizationId: 1,
+    weddingWorkspaceId: 1,
+    sectionId: 1,
+    mediaId: 1,
+  },
+  {
+    unique: true,
+  },
+)
+
+moodboardItemSchema.index({
+  organizationId: 1,
+  weddingWorkspaceId: 1,
+  sectionId: 1,
+  position: 1,
+})
+
 export const MoodboardItemModel = model<MoodboardItem>('MoodboardItem' , moodboardItemSchema)
