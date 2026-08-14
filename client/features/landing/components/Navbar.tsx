@@ -31,9 +31,7 @@ export default function Navbar() {
             </div>
             <div className="leading-tight">
               <div className="font-display text-xl text-[#B76E79]">{SITE.name}</div>
-              <div className="text-[9px] tracking-[0.25em] uppercase text-foreground/50 -mt-0.5 hidden sm:block">
-                {SITE.tagline}
-              </div>
+        
             </div>
           </a>
 

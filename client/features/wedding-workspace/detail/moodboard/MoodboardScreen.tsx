@@ -169,7 +169,9 @@ export function MoodboardScreen({ weddingId, onBoardModeChange }: MoodboardScree
                 Creative Board
               </p>
               <h2 className="truncate font-display text-2xl leading-none text-[#3B2928] sm:text-3xl">
-                {selectedSection} Theme
+                {selectedSection.toLowerCase() === 'client inspiration'
+                  ? selectedSection
+                  : `${selectedSection} Theme`}
               </h2>
             </div>
           </div>
@@ -419,6 +421,15 @@ export function MoodboardScreen({ weddingId, onBoardModeChange }: MoodboardScree
               >
                 <Upload className="h-4 w-4 text-[#D77474]" />
                 Upload Reference
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => openSectionBoard(sectionName)}
+                className="h-12 rounded-full border-[#F0DDD8] bg-white/86 px-7 text-[#3B2928] hover:bg-[#FFF7F4]"
+              >
+                <ImageIcon className="h-4 w-4 text-[#D77474]" />
+                View Inspiration
               </Button>
             </div>
           </div>

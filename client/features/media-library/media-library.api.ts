@@ -1,8 +1,11 @@
 import { apiClient } from "@/services";
 import type {
+  AddMoodboardItemRequest,
+  AddMoodboardItemResponse,
   CreateCollectionRequest,
   CreateCollectionResponse,
   DeleteCollectionResponse,
+  DeleteMediaResponse,
   GetCollectionByIdResponse,
   GetCollectionsResponse,
   GetMediaResponse,
@@ -26,6 +29,10 @@ type GetMediaParams = {
 type UploadMediaPayload = {
   file: File
   collectionId?: string | null
+}
+
+type AddMoodboardItemPayload = AddMoodboardItemRequest & {
+  weddingId: string
 }
 
 const createCollection = (
@@ -87,6 +94,26 @@ const uploadMedia = ({ file, collectionId = null }: UploadMediaPayload) => {
   )
 }
 
+const deleteMedia = (mediaId: string) =>
+  apiClient.del<DeleteMediaResponse>(
+    `/api/v1/media-library/media/${mediaId}`,
+  )
+
+const addMoodboardItem = ({
+  weddingId,
+  mediaId,
+  note,
+  sectionId,
+}: AddMoodboardItemPayload) =>
+  apiClient.post<AddMoodboardItemResponse, AddMoodboardItemRequest>(
+    `/api/v1/wedding-workspaces/${weddingId}/moodboard/items`,
+    {
+      mediaId,
+      ...(note ? { note } : {}),
+      ...(sectionId ? { sectionId } : {}),
+    },
+  )
+
 export const mediaLibraryApi = {
   createCollection,
   getCollections,
@@ -95,4 +122,6 @@ export const mediaLibraryApi = {
   deleteCollection,
   getMedia,
   uploadMedia,
+  deleteMedia,
+  addMoodboardItem,
 }
